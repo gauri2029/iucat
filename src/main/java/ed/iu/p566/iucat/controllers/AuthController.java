@@ -50,10 +50,4 @@ public class AuthController {
         session.invalidate();
         return "redirect:/login?logout=true";
     }
-    
-    @GetMapping("/403")
-    public String accessDenied(Model model) {
-        model.addAttribute("errorMessage", "You do not have permission to access this page.");
-        return "403";
-    }
 }
