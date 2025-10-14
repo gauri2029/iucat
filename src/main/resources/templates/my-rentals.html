@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>My Rentals - IU Cat</title>
+    <link rel="stylesheet" type="text/css" th:href="@{/css/styles.css}">
+</head>
+<body>
+    <nav class="navbar">
+        <h1>IU Cat Library</h1>
+        <div>
+            <a href="/search">Search</a>
+            <a href="/my-rentals">My Rentals</a>
+            <a href="/logout" class="logout-btn">Logout</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h2>My Active Rentals</h2>
+        
+        <div th:if="${param.success != null}" class="message">
+            Book returned successfully!
+        </div>
+        
+        <div th:if="${param.error != null}" class="error">
+            An error occurred. Please try again.
+        </div>
+        
+        <div th:if="${rentals != null && !rentals.isEmpty()}">
+            <div th:each="rental : ${rentals}" class="book-card" style="margin-bottom: 20px;">
+                <h4 th:text="${rental.book.title}">Book Title</h4>
+                <p class="book-author">by <span th:text="${rental.book.author}">Author</span></p>
+                <p class="book-isbn">ISBN: <span th:text="${rental.book.isbn}">ISBN</span></p>
+                <p>Rented on: <span th:text="${rental.rentalDate}">Date</span></p>
+                <p>Due date: <span th:text="${rental.dueDate}">Date</span></p>
+                <form th:action="@{/return/{id}(id=${rental.id})}" method="post" style="margin-top: 10px;">
+                    <button type="submit" class="btn btn-primary">Return Book</button>
+                </form>
+            </div>
+        </div>
+        
+        <div th:if="${rentals == null || rentals.isEmpty()}" class="no-results">
+            <p>You have no active rentals.</p>
+            <a href="/search" class="btn btn-primary">Browse Books</a>
+        </div>
+    </div>
+</body>
+</html>

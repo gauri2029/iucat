@@ -1,7 +1,9 @@
 package ed.iu.p566.iucat.config;
 
 import ed.iu.p566.iucat.data.BookRepository;
+import ed.iu.p566.iucat.data.UserRepository;
 import ed.iu.p566.iucat.model.Book;
+import ed.iu.p566.iucat.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
@@ -10,14 +12,23 @@ import org.springframework.stereotype.Component;
 public class DataLoader implements CommandLineRunner {
     
     private final BookRepository bookRepository;
+    private final UserRepository userRepository;
     
     @Autowired
-    public DataLoader(BookRepository bookRepository) {
+    public DataLoader(BookRepository bookRepository, UserRepository userRepository) {
         this.bookRepository = bookRepository;
+        this.userRepository = userRepository;
     }
     
     @Override
     public void run(String... args) throws Exception {
+        if (userRepository.count() == 0) {
+            userRepository.save(new User("abc", "password123", "USER"));
+            userRepository.save(new User("pqr", "password123", "USER"));
+            userRepository.save(new User("admin", "adminpassword123", "ADMIN"));
+            System.out.println("Sample users loaded into database!");
+        }
+        
         if (bookRepository.count() == 0) {
             bookRepository.save(new Book("978-0134685991", "Effective Java", "Joshua Bloch", 3));
             bookRepository.save(new Book("978-0596009205", "Head First Design Patterns", "Eric Freeman", 2));

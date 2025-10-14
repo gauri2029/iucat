@@ -1,6 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org"
-      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <title th:text="${book.title} + ' - IU Cat'">Book Details</title>
@@ -11,13 +10,11 @@
         <h1>IU Cat Library</h1>
         <div>
             <a href="/search">Search</a>
-            <span sec:authorize="isAuthenticated()">
+            <span th:if="${session.loggedInUser != null}">
                 <a href="/my-rentals">My Rentals</a>
-                <form th:action="@{/logout}" method="post" class="logout-form">
-                    <button type="submit" class="logout-btn">Logout</button>
-                </form>
+                <a href="/logout" class="logout-btn">Logout</a>
             </span>
-            <span sec:authorize="!isAuthenticated()">
+            <span th:if="${session.loggedInUser == null}">
                 <a href="/login">Login</a>
             </span>
         </div>
@@ -48,7 +45,7 @@
             </div>
             
             <div class="book-details-actions">
-                <span sec:authorize="isAuthenticated()">
+                <span th:if="${session.loggedInUser != null}">
                     <form th:if="${book.availableCopies > 0}" 
                           th:action="@{/rent/{id}(id=${book.id})}" 
                           method="post">
@@ -59,7 +56,7 @@
                     </div>
                 </span>
                 
-                <span sec:authorize="!isAuthenticated()">
+                <span th:if="${session.loggedInUser == null}">
                     <a href="/login" class="btn btn-primary btn-large">Login to Rent This Book</a>
                 </span>
             </div>
