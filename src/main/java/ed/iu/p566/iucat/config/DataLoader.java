@@ -18,7 +18,6 @@ public class DataLoader implements CommandLineRunner {
     
     @Override
     public void run(String... args) throws Exception {
-        // Only load data if database is empty
         if (bookRepository.count() == 0) {
             bookRepository.save(new Book("978-0134685991", "Effective Java", "Joshua Bloch", 3));
             bookRepository.save(new Book("978-0596009205", "Head First Design Patterns", "Eric Freeman", 2));
@@ -30,7 +29,20 @@ public class DataLoader implements CommandLineRunner {
             bookRepository.save(new Book("978-1617294945", "Spring in Action", "Craig Walls", 2));
             bookRepository.save(new Book("978-1491950357", "Building Microservices", "Sam Newman", 1));
             bookRepository.save(new Book("978-0321349606", "Java Concurrency in Practice", "Brian Goetz", 2));
-            
+            bookRepository.save(new Book("978-1491957660", "Deep Learning with Python", "François Chollet", 2));
+            bookRepository.save(new Book("978-1449373320", "Python for Data Analysis", "Wes McKinney", 3));
+            bookRepository.save(new Book("978-1492078005", "Machine Learning Design Patterns", "Valliappa Lakshmanan", 1));
+            bookRepository.save(new Book("978-0262033848", "Deep Learning", "Ian Goodfellow", 1));
+            bookRepository.save(new Book("978-0131103627", "The C Programming Language", "Brian Kernighan and Dennis Ritchie", 2));
+            bookRepository.save(new Book("978-0201616224", "The Mythical Man-Month", "Frederick P. Brooks Jr.", 2));
+            bookRepository.save(new Book("978-1118531648", "Big Data: Principles and Best Practices of Scalable Realtime Data Systems", "Nathan Marz", 1));
+            bookRepository.save(new Book("978-0596517748", "Beautiful Data", "Toby Segaran", 1));
+            bookRepository.save(new Book("978-0141033570", "Outliers: The Story of Success", "Malcolm Gladwell", 3));
+            bookRepository.save(new Book("978-0062316097", "Sapiens: A Brief History of Humankind", "Yuval Noah Harari", 3));
+            bookRepository.save(new Book("978-0307465351", "The Lean Startup", "Eric Ries", 2));
+            bookRepository.save(new Book("978-0062457714", "Atomic Habits", "James Clear", 3));
+            bookRepository.save(new Book("978-0671027032", "Rich Dad Poor Dad", "Robert Kiyosaki", 3));
+            bookRepository.save(new Book("978-1982137274", "Think Like a Monk", "Jay Shetty", 2));
             System.out.println("Sample books loaded into database!");
         }
     }

@@ -29,22 +29,36 @@
             <form th:action="@{/search}" method="get" class="search-form">
                 <input type="text" 
                        name="query" 
+                       th:value="${query}"
                        class="search-input" 
                        placeholder="Search by title, author, or ISBN...">
                 <button type="submit" class="btn btn-primary">Search</button>
             </form>
         </div>
 
-        <div class="welcome-message">
-            <span sec:authorize="isAuthenticated()">
-                <p>Welcome, <strong sec:authentication="name">User</strong>!</p>
-                <p>Start searching for books to rent.</p>
-            </span>
-            <span sec:authorize="!isAuthenticated()">
-                <p>Welcome to IU Cat Library!</p>
-                <p>You can search for books without logging in.</p>
-                <p><a href="/login">Login</a> to rent books.</p>
-            </span>
+        <div th:if="${books != null && !books.isEmpty()}" class="results-section">
+            <h3 th:if="${query != null}">Search Results for "<span th:text="${query}"></span>"</h3>
+            <h3 th:if="${query == null}">All Books</h3>
+            <p class="results-count"><span th:text="${books.size()}"></span> book(s) found</p>
+            
+            <div class="books-grid">
+                <div th:each="book : ${books}" class="book-card">
+                    <h4 th:text="${book.title}">Book Title</h4>
+                    <p class="book-author">by <span th:text="${book.author}">Author</span></p>
+                    <p class="book-isbn">ISBN: <span th:text="${book.isbn}">ISBN</span></p>
+                    <p th:classappend="${book.availableCopies > 0 ? 'available' : 'unavailable'}">
+                        <strong><span th:text="${book.availableCopies}"></span></strong> of 
+                        <span th:text="${book.totalCopies}"></span> available
+                    </p>
+                    <div class="book-actions">
+                        <a th:href="@{/books/{id}(id=${book.id})}" class="btn btn-secondary">View Details</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div th:if="${books == null || books.isEmpty()}" class="no-results">
+            <p>No books found<span th:if="${query != null}"> for "<span th:text="${query}"></span>"</span>.</p>
         </div>
     </div>
 </body>

@@ -46,20 +46,20 @@ public class SecurityConfig {
     @Bean
     public UserDetailsService userDetailsService() {
         UserDetails user1 = User.builder()
-            .username("alice")
+            .username("abc")
             .password(passwordEncoder().encode("password123"))
             .roles("USER")
             .build();
         
         UserDetails user2 = User.builder()
-            .username("bob")
+            .username("pqr")
             .password(passwordEncoder().encode("password123"))
             .roles("USER")
             .build();
         
         UserDetails admin = User.builder()
             .username("admin")
-            .password(passwordEncoder().encode("admin123"))
+            .password(passwordEncoder().encode("adminpassword123"))
             .roles("ADMIN", "USER")
             .build();
         
