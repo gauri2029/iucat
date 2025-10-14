@@ -1,0 +1,9 @@
+target/
+.mvn/
+*.db
+*.sqlite
+.idea/
+*.iml
+.vscode/
+.DS_Store
+Thumbs.db
