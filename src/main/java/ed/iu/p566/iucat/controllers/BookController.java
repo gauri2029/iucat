@@ -33,11 +33,12 @@ public class BookController {
         if (query != null && !query.trim().isEmpty()) {
             books = bookRepository.searchBooks(query.trim());
             model.addAttribute("query", query);
+            model.addAttribute("books", books);
+            model.addAttribute("searched", true);
         } else {
-            books = bookRepository.findAll();
+            model.addAttribute("searched", false);
         }
         
-        model.addAttribute("books", books);
         return "search";
     }
     

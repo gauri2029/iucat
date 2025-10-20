@@ -28,14 +28,23 @@
                        name="query" 
                        th:value="${query}"
                        class="search-input" 
-                       placeholder="Search by title, author, or ISBN...">
+                       placeholder="Search by title, author, or ISBN..."
+                       required>
                 <button type="submit" class="btn btn-primary">Search</button>
             </form>
+            <p style="margin-top: 10px;">
+                <a href="/advanced-search" style="color: #990000;">Advanced Search</a>
+            </p>
         </div>
 
-        <div th:if="${books != null && !books.isEmpty()}" class="results-section">
-            <h3 th:if="${query != null}">Search Results for "<span th:text="${query}"></span>"</h3>
-            <h3 th:if="${query == null}">All Books</h3>
+        <div th:if="${searched == false}" class="welcome-message">
+            <h1>Welcome to IU Cat Library</h1>
+            <h2>Browse our collection of books.</h2>
+            <h2>Use the search box to find books by title, author, or ISBN.</h2>
+        </div>
+
+        <div th:if="${searched == true && books != null && !books.isEmpty()}" class="results-section">
+            <h3>Search Results for "<span th:text="${query}"></span>"</h3>
             <p class="results-count"><span th:text="${books.size()}"></span> book(s) found</p>
             
             <div class="books-grid">
@@ -54,8 +63,9 @@
             </div>
         </div>
 
-        <div th:if="${books == null || books.isEmpty()}" class="no-results">
-            <p>No books found<span th:if="${query != null}"> for "<span th:text="${query}"></span>"</span>.</p>
+        <div th:if="${searched == true && (books == null || books.isEmpty())}" class="no-results">
+            <p>No books found for "<span th:text="${query}"></span>".</p>
+            <p>Try different search terms or check your spelling.</p>
         </div>
     </div>
 </body>
