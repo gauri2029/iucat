@@ -4,6 +4,100 @@
     <meta charset="UTF-8">
     <title>Search Books - IU Cat</title>
     <link rel="stylesheet" type="text/css" th:href="@{/css/styles.css}" />
+    <style>
+        .search-container {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+            flex: 1;
+        }
+
+        .search-dropdown {
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            background-color: white;
+            cursor: pointer;
+            font-size: 14px;
+            min-width: 120px;
+        }
+
+        .search-input-wrapper {
+            flex: 1;
+        }
+
+        .search-input {
+            border-left: none;
+        }
+
+        .main-content {
+            display: flex;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .sidebar {
+            width: 250px;
+            background: white;
+            border: 1px solid #ddd;
+            padding: 20px;
+            height: fit-content;
+        }
+
+        .sidebar h3 {
+            font-size: 16px;
+            margin-bottom: 15px;
+            color: #990000;
+            border-bottom: 2px solid #990000;
+            padding-bottom: 5px;
+        }
+
+        .filter-section {
+            margin-bottom: 20px;
+        }
+
+        .filter-section h4 {
+            font-size: 14px;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .filter-option {
+            margin: 8px 0;
+            font-size: 13px;
+        }
+
+        .filter-option a {
+            color: #333;
+            text-decoration: none;
+        }
+
+        .filter-option a:hover {
+            color: #990000;
+            text-decoration: underline;
+        }
+
+        .filter-option.active a {
+            color: #990000;
+            font-weight: bold;
+        }
+
+        .results-container {
+            flex: 1;
+        }
+
+        .clear-filters {
+            background: #f0f0f0;
+            padding: 10px;
+            margin-bottom: 15px;
+            border-left: 3px solid #990000;
+        }
+
+        .clear-filters a {
+            color: #990000;
+            text-decoration: none;
+            font-weight: bold;
+        }
+    </style>
 </head>
 <body>
     <nav class="navbar">
@@ -24,17 +118,22 @@
         <div class="search-box">
             <h2>Search for Books</h2>
             <form th:action="@{/search}" method="get" class="search-form">
-                <input type="text" 
-                       name="query" 
-                       th:value="${query}"
-                       class="search-input" 
-                       placeholder="Search by title, author, or ISBN..."
-                       required>
+                <div class="search-container">
+                    <select name="searchField" class="search-dropdown">
+                        <option value="all" th:selected="${searchField == 'all' or searchField == null}">All Fields
+                        </option>
+                        <option value="title" th:selected="${searchField == 'title'}">Title</option>
+                        <option value="author" th:selected="${searchField == 'author'}">Author</option>
+                        <option value="subject" th:selected="${searchField == 'subject'}">Subject/ISBN</option>
+                    </select>
+
+                    <div class="search-input-wrapper">
+                        <input type="text" name="query" th:value="${query}" class="search-input"
+                            placeholder="Search the library catalog..." required>
+                    </div>
+                </div>
                 <button type="submit" class="btn btn-primary">Search</button>
             </form>
-            <p style="margin-top: 10px;">
-                <a href="/advanced-search" style="color: #990000;">Advanced Search</a>
-            </p>
         </div>
 
         <div th:if="${searched == false}" class="welcome-message">
@@ -43,29 +142,116 @@
             <h2>Use the search box to find books by title, author, or ISBN.</h2>
         </div>
 
-        <div th:if="${searched == true && books != null && !books.isEmpty()}" class="results-section">
-            <h3>Search Results for "<span th:text="${query}"></span>"</h3>
-            <p class="results-count"><span th:text="${books.size()}"></span> book(s) found</p>
-            
-            <div class="books-grid">
-                <div th:each="book : ${books}" class="book-card">
-                    <h4 th:text="${book.title}">Book Title</h4>
-                    <p class="book-author">by <span th:text="${book.author}">Author</span></p>
-                    <p class="book-isbn">ISBN: <span th:text="${book.isbn}">ISBN</span></p>
-                    <p th:classappend="${book.availableCopies > 0 ? 'available' : 'unavailable'}">
-                        <strong><span th:text="${book.availableCopies}"></span></strong> of 
-                        <span th:text="${book.totalCopies}"></span> available
-                    </p>
-                    <div class="book-actions">
-                        <a th:href="@{/books/{id}(id=${book.id})}" class="btn btn-secondary">View Details</a>
+        <div th:if="${searched == true}" class="main-content">
+            <div th:if="${books != null && !books.isEmpty()}" class="sidebar">
+                <h3>Refine Your Search</h3>
+
+                <div th:if="${selectedAuthor != null or selectedSubject != null or selectedFormat != null or selectedLanguage != null or selectedYear != null or (availableOnly != null and availableOnly)}"
+                    class="clear-filters">
+                    <a th:href="@{/search(query=${query}, searchField=${searchField})}">✕ Clear All Filters</a>
+                </div>
+
+                <div class="filter-section" th:if="${filterAuthors != null && !filterAuthors.isEmpty()}">
+                    <h4>Author</h4>
+                    <div th:each="author : ${filterAuthors}" class="filter-option"
+                        th:classappend="${selectedAuthor != null && selectedAuthor == author} ? 'active' : ''">
+                        <a th:href="@{/search(query=${query}, searchField=${searchField}, filterAuthor=${author}, 
+                                   filterSubject=${selectedSubject}, filterFormat=${selectedFormat}, 
+                                   filterLanguage=${selectedLanguage}, filterYear=${selectedYear}, availableOnly=${availableOnly})}"
+                            th:text="${author}">Author Name</a>
+                    </div>
+                </div>
+
+                <div class="filter-section" th:if="${filterSubjects != null && !filterSubjects.isEmpty()}">
+                    <h4>Subject</h4>
+                    <div th:each="subject : ${filterSubjects}" class="filter-option"
+                        th:classappend="${selectedSubject != null && selectedSubject == subject} ? 'active' : ''">
+                        <a th:href="@{/search(query=${query}, searchField=${searchField}, filterAuthor=${selectedAuthor}, 
+                                   filterSubject=${subject}, filterFormat=${selectedFormat}, 
+                                   filterLanguage=${selectedLanguage}, filterYear=${selectedYear}, availableOnly=${availableOnly})}"
+                            th:text="${subject}">Subject</a>
+                    </div>
+                </div>
+                <div class="filter-section" th:if="${filterFormats != null && !filterFormats.isEmpty()}">
+                    <h4>Format</h4>
+                    <div th:each="format : ${filterFormats}" class="filter-option"
+                        th:classappend="${selectedFormat != null && selectedFormat == format} ? 'active' : ''">
+                        <a th:href="@{/search(query=${query}, searchField=${searchField}, filterAuthor=${selectedAuthor}, 
+                                   filterSubject=${selectedSubject}, filterFormat=${format}, 
+                                   filterLanguage=${selectedLanguage}, filterYear=${selectedYear}, availableOnly=${availableOnly})}"
+                            th:text="${format}">Format</a>
+                    </div>
+                </div>
+
+                <div class="filter-section" th:if="${filterLanguages != null && !filterLanguages.isEmpty()}">
+                    <h4>Language</h4>
+                    <div th:each="language : ${filterLanguages}" class="filter-option"
+                        th:classappend="${selectedLanguage != null && selectedLanguage == language} ? 'active' : ''">
+                        <a th:href="@{/search(query=${query}, searchField=${searchField}, filterAuthor=${selectedAuthor}, 
+                                   filterSubject=${selectedSubject}, filterFormat=${selectedFormat}, 
+                                   filterLanguage=${language}, filterYear=${selectedYear}, availableOnly=${availableOnly})}"
+                            th:text="${language}">Language</a>
+                    </div>
+                </div>
+
+                <div class="filter-section" th:if="${filterYears != null && !filterYears.isEmpty()}">
+                    <h4>Publication Year</h4>
+                    <div th:each="year : ${filterYears}" class="filter-option"
+                        th:classappend="${selectedYear != null && selectedYear == year} ? 'active' : ''">
+                        <a th:href="@{/search(query=${query}, searchField=${searchField}, filterAuthor=${selectedAuthor}, 
+                                   filterSubject=${selectedSubject}, filterFormat=${selectedFormat}, 
+                                   filterLanguage=${selectedLanguage}, filterYear=${year}, availableOnly=${availableOnly})}"
+                            th:text="${year}">Year</a>
+                    </div>
+                </div>
+
+                <div class="filter-section">
+                    <h4>Availability</h4>
+                    <div class="filter-option" th:classappend="${availableOnly} ? 'active' : ''">
+                        <a
+                            th:href="@{/search(query=${query}, searchField=${searchField}, filterAuthor=${selectedAuthor}, 
+                                   filterSubject=${selectedSubject}, filterFormat=${selectedFormat}, 
+                                   filterLanguage=${selectedLanguage}, filterYear=${selectedYear}, availableOnly=true)}">
+                            ✓ Available Now
+                        </a>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <div th:if="${searched == true && (books == null || books.isEmpty())}" class="no-results">
-            <p>No books found for "<span th:text="${query}"></span>".</p>
-            <p>Try different search terms or check your spelling.</p>
+            <div class="results-container">
+                <div th:if="${books != null && !books.isEmpty()}" class="results-section">
+                    <h3>Search Results</h3>
+                    <p class="results-count">
+                        Showing <strong><span th:text="${books.size()}"></span></strong> result(s) for
+                        "<span th:text="${query}"></span>" in <span th:text="${searchField}"></span>
+                    </p>
+
+                    <div class="books-grid">
+                        <div th:each="book : ${books}" class="book-card">
+                            <h4 th:text="${book.title}">Book Title</h4>
+                            <p class="book-author">by <span th:text="${book.author}">Author</span></p>
+                            <p class="book-isbn">ISBN: <span th:text="${book.isbn}">ISBN</span></p>
+                            <p style="font-size: 0.9em; color: #666;">
+                                <span th:text="${book.format}">Format</span> |
+                                <span th:text="${book.publicationYear}">Year</span> |
+                                <span th:text="${book.language}">Language</span>
+                            </p>
+                            <p th:classappend="${book.availableCopies > 0 ? 'available' : 'unavailable'}">
+                                <strong><span th:text="${book.availableCopies}"></span></strong> of
+                                <span th:text="${book.totalCopies}"></span> available
+                            </p>
+                            <div class="book-actions">
+                                <a th:href="@{/books/{id}(id=${book.id})}" class="btn btn-secondary">View Details</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div th:if="${books == null || books.isEmpty()}" class="no-results">
+                    <p>No books found for "<span th:text="${query}"></span>".</p>
+                    <p>Try different search terms or adjust your filters.</p>
+                </div>
+            </div>
         </div>
     </div>
 </body>

@@ -10,42 +10,153 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Controller
 public class BookController {
-    
+
     private final BookRepository bookRepository;
-    
+
     @Autowired
     public BookController(BookRepository bookRepository) {
         this.bookRepository = bookRepository;
     }
-    
+
     @GetMapping("/")
     public String home() {
         return "redirect:/search";
     }
-    
+
     @GetMapping("/search")
-    public String search(@RequestParam(required = false) String query, Model model) {
-        List<Book> books;
-        
+    public String search(
+            @RequestParam(required = false) String query,
+            @RequestParam(required = false, defaultValue = "all") String searchField,
+            @RequestParam(required = false) String filterAuthor,
+            @RequestParam(required = false) String filterSubject,
+            @RequestParam(required = false) String filterFormat,
+            @RequestParam(required = false) String filterLanguage,
+            @RequestParam(required = false) Integer filterYear,
+            @RequestParam(required = false) Boolean availableOnly,
+            Model model) {
+
+        List<Book> books = null;
+
         if (query != null && !query.trim().isEmpty()) {
-            books = bookRepository.searchBooks(query.trim());
+            String trimmedQuery = query.trim();
+
+            switch (searchField.toLowerCase()) {
+                case "title":
+                    books = bookRepository.searchByTitle(trimmedQuery);
+                    break;
+                case "author":
+                    books = bookRepository.searchByAuthor(trimmedQuery);
+                    break;
+                case "subject":
+                    books = bookRepository.searchBySubject(trimmedQuery);
+                    break;
+                default:
+                    books = bookRepository.searchBooks(trimmedQuery);
+            }
+
+            if (books != null && !books.isEmpty()) {
+                if (filterAuthor != null && !filterAuthor.isEmpty()) {
+                    books = books.stream()
+                            .filter(b -> b.getAuthor().equalsIgnoreCase(filterAuthor))
+                            .collect(Collectors.toList());
+                }
+
+                if (filterSubject != null && !filterSubject.isEmpty()) {
+                    books = books.stream()
+                            .filter(b -> b.getSubject().equalsIgnoreCase(filterSubject))
+                            .collect(Collectors.toList());
+                }
+
+                if (filterFormat != null && !filterFormat.isEmpty()) {
+                    books = books.stream()
+                            .filter(b -> b.getFormat().equalsIgnoreCase(filterFormat))
+                            .collect(Collectors.toList());
+                }
+
+                if (filterLanguage != null && !filterLanguage.isEmpty()) {
+                    books = books.stream()
+                            .filter(b -> b.getLanguage().equalsIgnoreCase(filterLanguage))
+                            .collect(Collectors.toList());
+                }
+
+                if (filterYear != null) {
+                    books = books.stream()
+                            .filter(b -> b.getPublicationYear().equals(filterYear))
+                            .collect(Collectors.toList());
+                }
+
+                if (availableOnly != null && availableOnly) {
+                    books = books.stream()
+                            .filter(Book::isAvailable)
+                            .collect(Collectors.toList());
+                }
+            }
+
+            if (books != null && !books.isEmpty()) {
+                List<String> authors = books.stream()
+                        .map(Book::getAuthor)
+                        .distinct()
+                        .sorted()
+                        .collect(Collectors.toList());
+
+                List<String> subjects = books.stream()
+                        .map(Book::getSubject)
+                        .distinct()
+                        .sorted()
+                        .collect(Collectors.toList());
+
+                List<String> formats = books.stream()
+                        .map(Book::getFormat)
+                        .distinct()
+                        .sorted()
+                        .collect(Collectors.toList());
+
+                List<String> languages = books.stream()
+                        .map(Book::getLanguage)
+                        .distinct()
+                        .sorted()
+                        .collect(Collectors.toList());
+
+                List<Integer> years = books.stream()
+                        .map(Book::getPublicationYear)
+                        .distinct()
+                        .sorted((a, b) -> b - a)
+                        .collect(Collectors.toList());
+
+                model.addAttribute("filterAuthors", authors);
+                model.addAttribute("filterSubjects", subjects);
+                model.addAttribute("filterFormats", formats);
+                model.addAttribute("filterLanguages", languages);
+                model.addAttribute("filterYears", years);
+            }
+
             model.addAttribute("query", query);
+            model.addAttribute("searchField", searchField);
             model.addAttribute("books", books);
             model.addAttribute("searched", true);
+
+            model.addAttribute("selectedAuthor", filterAuthor);
+            model.addAttribute("selectedSubject", filterSubject);
+            model.addAttribute("selectedFormat", filterFormat);
+            model.addAttribute("selectedLanguage", filterLanguage);
+            model.addAttribute("selectedYear", filterYear);
+            model.addAttribute("availableOnly", availableOnly);
         } else {
             model.addAttribute("searched", false);
+            model.addAttribute("searchField", "all");
         }
-        
+
         return "search";
     }
-    
+
     @GetMapping("/books/{id}")
     public String bookDetails(@PathVariable Long id, Model model) {
         Book book = bookRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Book not found"));
+                .orElseThrow(() -> new RuntimeException("Book not found"));
         model.addAttribute("book", book);
         return "book-details";
     }
