@@ -17,15 +17,18 @@ body {
 }
 
 .navbar h1 {
-    display: inline-block;
     font-size: 1.5em;
-    margin-right: 30px;
+    margin: 0;
 }
 
 .navbar a {
     color: white;
     text-decoration: none;
     margin-left: 15px;
+}
+
+.navbar a:hover {
+    text-decoration: underline;
 }
 
 .logout-form {
@@ -39,6 +42,12 @@ body {
     color: white;
     cursor: pointer;
     text-decoration: underline;
+    font-size: inherit;
+    font-family: inherit;
+}
+
+.logout-btn:hover {
+    opacity: 0.8;
 }
 
 .container {
@@ -54,6 +63,12 @@ body {
     cursor: pointer;
     text-decoration: none;
     display: inline-block;
+    border-radius: 4px;
+    transition: all 0.3s;
+}
+
+.btn:hover {
+    opacity: 0.9;
 }
 
 .btn-primary {
@@ -62,10 +77,18 @@ body {
     border: 1px solid #990000;
 }
 
+.btn-primary:hover {
+    background-color: #770000;
+}
+
 .btn-secondary {
     background-color: #666;
     color: white;
     border: 1px solid #666;
+}
+
+.btn-secondary:hover {
+    background-color: #555;
 }
 
 .btn-large {
@@ -78,6 +101,7 @@ body {
     padding: 20px;
     border: 1px solid #ddd;
     margin-bottom: 20px;
+    border-radius: 4px;
 }
 
 .search-box h2 {
@@ -93,13 +117,26 @@ body {
     flex: 1;
     padding: 10px;
     border: 1px solid #ddd;
+    border-radius: 4px;
 }
 
 .welcome-message {
     background: white;
-    padding: 20px;
+    padding: 40px 20px;
     border: 1px solid #ddd;
     text-align: center;
+    border-radius: 4px;
+}
+
+.welcome-message h1 {
+    color: #990000;
+    margin-bottom: 15px;
+}
+
+.welcome-message h2 {
+    color: #666;
+    font-weight: normal;
+    margin-bottom: 10px;
 }
 
 .welcome-message a {
@@ -115,10 +152,12 @@ body {
     background: white;
     border: 1px solid #ddd;
     padding: 30px;
+    border-radius: 4px;
 }
 
 .login-form h2 {
     margin-bottom: 20px;
+    color: #990000;
 }
 
 .form-group {
@@ -136,6 +175,7 @@ input[type="password"] {
     width: 100%;
     padding: 10px;
     border: 1px solid #ddd;
+    border-radius: 4px;
 }
 
 button[type="submit"] {
@@ -144,22 +184,30 @@ button[type="submit"] {
     color: white;
     border: none;
     cursor: pointer;
+    border-radius: 4px;
+    font-size: 1em;
+}
+
+button[type="submit"]:hover {
+    background-color: #770000;
 }
 
 .error {
-    color: red;
+    color: #cc0000;
     background-color: #ffe6e6;
-    border: 1px solid red;
+    border: 1px solid #cc0000;
     padding: 10px;
     margin-bottom: 15px;
+    border-radius: 4px;
 }
 
 .message {
-    color: green;
+    color: #28a745;
     background-color: #e6ffe6;
-    border: 1px solid green;
+    border: 1px solid #28a745;
     padding: 10px;
     margin-bottom: 15px;
+    border-radius: 4px;
 }
 
 .demo-creds {
@@ -167,14 +215,17 @@ button[type="submit"] {
     padding: 15px;
     margin-top: 20px;
     border: 1px solid #ddd;
+    border-radius: 4px;
 }
 
 .demo-creds h4 {
     margin-bottom: 10px;
+    color: #990000;
 }
 
 .demo-creds p {
     margin: 5px 0;
+    font-size: 0.9em;
 }
 
 .error-page {
@@ -187,6 +238,7 @@ button[type="submit"] {
     padding: 30px;
     background-color: #ffe6e6;
     text-align: center;
+    border-radius: 4px;
 }
 
 .error-box h1 {
@@ -221,10 +273,17 @@ button[type="submit"] {
     background: white;
     padding: 15px;
     border: 1px solid #ddd;
+    border-radius: 4px;
+    transition: box-shadow 0.3s;
+}
+
+.book-card:hover {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
 .book-card h4 {
     margin-bottom: 8px;
+    color: #990000;
 }
 
 .book-author {
@@ -239,12 +298,12 @@ button[type="submit"] {
 }
 
 .available {
-    color: green;
+    color: #28a745;
     font-weight: bold;
 }
 
 .unavailable {
-    color: red;
+    color: #dc3545;
     font-weight: bold;
 }
 
@@ -258,12 +317,18 @@ button[type="submit"] {
     border: 1px solid #ddd;
     text-align: center;
     margin-top: 20px;
+    border-radius: 4px;
 }
 
 .back-link {
     display: inline-block;
     color: #990000;
     margin-bottom: 15px;
+    text-decoration: none;
+}
+
+.back-link:hover {
+    text-decoration: underline;
 }
 
 .book-details-card {
@@ -271,10 +336,12 @@ button[type="submit"] {
     padding: 30px;
     border: 1px solid #ddd;
     max-width: 800px;
+    border-radius: 4px;
 }
 
 .book-details-card h2 {
     margin-bottom: 20px;
+    color: #990000;
 }
 
 .detail-row {
@@ -285,7 +352,7 @@ button[type="submit"] {
 .detail-label {
     font-weight: bold;
     display: inline-block;
-    width: 120px;
+    width: 150px;
 }
 
 .detail-value {
@@ -294,6 +361,9 @@ button[type="submit"] {
 
 .book-details-actions {
     padding-top: 20px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
 }
 
 .unavailable-message {
@@ -301,4 +371,113 @@ button[type="submit"] {
     border: 1px solid #ffcc00;
     padding: 15px;
     color: #666;
+    border-radius: 4px;
+}
+
+/* Hold-specific styles */
+.hold-info {
+    background-color: #fff9e6;
+    border: 1px solid #ffcc00;
+    padding: 15px;
+    margin: 15px 0;
+    border-radius: 4px;
+}
+
+.hold-info strong {
+    color: #990000;
+}
+
+.user-hold-status {
+    background-color: #e6f3ff;
+    border: 1px solid #0066cc;
+    padding: 12px;
+    margin: 15px 0;
+    border-radius: 4px;
+}
+
+.alert-error {
+    background-color: #ffe6e6;
+    border: 1px solid #cc0000;
+    padding: 12px;
+    margin: 15px 0;
+    border-radius: 4px;
+    color: #cc0000;
+}
+
+.hold-card {
+    background: white;
+    padding: 20px;
+    border: 1px solid #ddd;
+    margin-bottom: 20px;
+    border-radius: 4px;
+}
+
+.hold-card.ready {
+    border-left: 5px solid #28a745;
+    background-color: #f0fff4;
+}
+
+.hold-card.pending {
+    border-left: 5px solid #ffc107;
+    background-color: #fffef0;
+}
+
+.hold-status {
+    display: inline-block;
+    padding: 5px 12px;
+    border-radius: 3px;
+    font-weight: bold;
+    font-size: 0.9em;
+    margin-bottom: 10px;
+}
+
+.hold-status.ready {
+    background-color: #28a745;
+    color: white;
+}
+
+.hold-status.pending {
+    background-color: #ffc107;
+    color: #333;
+}
+
+.hold-info-row {
+    margin: 8px 0;
+    color: #666;
+}
+
+.hold-actions {
+    margin-top: 15px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.expiration-warning {
+    background-color: #fff3cd;
+    border: 1px solid #ffc107;
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 4px;
+    color: #856404;
+}
+
+.queue-position {
+    font-size: 1.2em;
+    color: #990000;
+    font-weight: bold;
+}
+
+.no-holds {
+    text-align: center;
+    padding: 40px;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.section-divider {
+    margin: 30px 0 20px 0;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #ddd;
 }

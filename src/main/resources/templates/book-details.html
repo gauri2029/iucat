@@ -4,15 +4,51 @@
     <meta charset="UTF-8">
     <title th:text="${book.title} + ' - IU Cat'">Book Details</title>
     <link rel="stylesheet" type="text/css" th:href="@{/css/styles.css}">
+    <style>
+        .hold-info {
+            background-color: #fff9e6;
+            border: 1px solid #ffcc00;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+        
+        .hold-info strong {
+            color: #990000;
+        }
+        
+        .user-hold-status {
+            background-color: #e6f3ff;
+            border: 1px solid #0066cc;
+            padding: 12px;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+        
+        .alert-error {
+            background-color: #ffe6e6;
+            border: 1px solid #cc0000;
+            padding: 12px;
+            margin: 15px 0;
+            border-radius: 4px;
+            color: #cc0000;
+        }
+    </style>
 </head>
 <body>
     <nav class="navbar">
         <h1>IU Cat Library</h1>
-        <div>
+        <div style="display: flex; align-items: center; gap: 15px;">
             <a href="/search">Search</a>
-            <span th:if="${session.loggedInUser != null}">
+            <span th:if="${session.loggedInUser != null}" style="display: flex; gap: 15px; align-items: center;">
                 <a href="/my-rentals">My Rentals</a>
-                <a href="/logout" class="logout-btn">Logout</a>
+                <a href="/my-holds">My Holds</a>
+                <span style="color: white; margin-left: 10px;">
+                    Welcome, <span th:text="${session.loggedInUser.username}">User</span>
+                </span>
+                <form action="/logout" method="get" class="logout-form">
+                    <button type="submit" class="logout-btn">Logout</button>
+                </form>
             </span>
             <span th:if="${session.loggedInUser == null}">
                 <a href="/login">Login</a>
@@ -21,7 +57,16 @@
     </nav>
 
     <div class="container">
-        <a href="/search" class="back-link">Back to Search</a>
+        <a href="/search" class="back-link">← Back to Search</a>
+        
+        <div th:if="${param.error != null}" class="alert-error">
+            <span th:if="${param.error[0] == 'alreadyHold'}">
+                You already have an active hold for this book.
+            </span>
+            <span th:if="${param.error[0] == 'true'}">
+                An error occurred. Please try again.
+            </span>
+        </div>
         
         <div class="book-details-card">
             <h2 th:text="${book.title}">Book Title</h2>
@@ -37,6 +82,21 @@
             </div>
             
             <div class="detail-row">
+                <span class="detail-label">Subject:</span>
+                <span class="detail-value" th:text="${book.subject}">Subject</span>
+            </div>
+            
+            <div class="detail-row">
+                <span class="detail-label">Format:</span>
+                <span class="detail-value" th:text="${book.format}">Format</span>
+            </div>
+            
+            <div class="detail-row">
+                <span class="detail-label">Year:</span>
+                <span class="detail-value" th:text="${book.publicationYear}">Year</span>
+            </div>
+            
+            <div class="detail-row">
                 <span class="detail-label">Availability:</span>
                 <span class="detail-value" th:classappend="${book.availableCopies > 0 ? 'available' : 'unavailable'}">
                     <strong><span th:text="${book.availableCopies}"></span></strong> of 
@@ -44,20 +104,51 @@
                 </span>
             </div>
             
+            <div th:if="${holdCount != null && holdCount > 0}" class="hold-info">
+                <strong>
+                    <span th:text="${holdCount}"></span> 
+                    <span th:text="${holdCount == 1 ? 'person has' : 'people have'}"></span> 
+                    placed a hold on this book
+                </strong>
+            </div>
+            
+            <div th:if="${userHold != null}" class="user-hold-status">
+                <span th:if="${userHold.status == 'pending'}">
+                    ✓ You have a hold on this book. You are <strong>#<span th:text="${userHold.queuePosition}"></span></strong> in the queue.
+                </span>
+                <span th:if="${userHold.status == 'ready'}">
+                    ✓ Your hold is ready! This book is waiting for you. Pick up by <strong th:text="${userHold.expirationDate}"></strong>.
+                </span>
+            </div>
+            
             <div class="book-details-actions">
                 <span th:if="${session.loggedInUser != null}">
                     <form th:if="${book.availableCopies > 0}" 
                           th:action="@{/rent/{id}(id=${book.id})}" 
-                          method="post">
+                          method="post" style="display: inline;">
                         <button type="submit" class="btn btn-primary btn-large">Rent This Book</button>
                     </form>
-                    <div th:if="${book.availableCopies == 0}" class="unavailable-message">
-                        <p>This book is currently unavailable. All copies are rented out.</p>
+                    
+                    <form th:if="${book.availableCopies == 0 && userHold == null}" 
+                          th:action="@{/holds/place/{id}(id=${book.id})}" 
+                          method="post" style="display: inline;">
+                        <button type="submit" class="btn btn-secondary btn-large">Place Hold</button>
+                    </form>
+                    
+                    <form th:if="${userHold != null && userHold.status == 'ready'}" 
+                          th:action="@{/holds/pickup/{id}(id=${userHold.id})}" 
+                          method="post" style="display: inline; margin-left: 10px;">
+                        <button type="submit" class="btn btn-primary btn-large">Pick Up / Rent Now</button>
+                    </form>
+                    
+                    <div th:if="${book.availableCopies == 0 && userHold != null && userHold.status == 'pending'}" 
+                         class="unavailable-message">
+                        <p>All copies are currently rented. You're in the hold queue!</p>
                     </div>
                 </span>
                 
                 <span th:if="${session.loggedInUser == null}">
-                    <a href="/login" class="btn btn-primary btn-large">Login to Rent This Book</a>
+                    <a href="/login" class="btn btn-primary btn-large">Login to Rent or Place Hold</a>
                 </span>
             </div>
         </div>

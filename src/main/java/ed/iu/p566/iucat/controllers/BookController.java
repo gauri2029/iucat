@@ -1,7 +1,11 @@
 package ed.iu.p566.iucat.controllers;
 
 import ed.iu.p566.iucat.data.BookRepository;
+import ed.iu.p566.iucat.data.HoldRepository;
 import ed.iu.p566.iucat.model.Book;
+import ed.iu.p566.iucat.model.Hold;
+import ed.iu.p566.iucat.model.User;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -10,16 +14,19 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Controller
 public class BookController {
 
     private final BookRepository bookRepository;
+    private final HoldRepository holdRepository;
 
     @Autowired
-    public BookController(BookRepository bookRepository) {
+    public BookController(BookRepository bookRepository, HoldRepository holdRepository) {
         this.bookRepository = bookRepository;
+        this.holdRepository = holdRepository;
     }
 
     @GetMapping("/")
@@ -154,10 +161,25 @@ public class BookController {
     }
 
     @GetMapping("/books/{id}")
-    public String bookDetails(@PathVariable Long id, Model model) {
+    public String bookDetails(@PathVariable Long id, Model model, HttpSession session) {
         Book book = bookRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Book not found"));
+        
+        Long holdCount = holdRepository.countPendingHoldsByBook(book);
+        
+        User loggedInUser = (User) session.getAttribute("loggedInUser");
+        Hold userHold = null;
+        if (loggedInUser != null) {
+            Optional<Hold> holdOpt = holdRepository.findActiveHoldByUserAndBook(loggedInUser, book);
+            if (holdOpt.isPresent()) {
+                userHold = holdOpt.get();
+            }
+        }
+        
         model.addAttribute("book", book);
+        model.addAttribute("holdCount", holdCount);
+        model.addAttribute("userHold", userHold);
+        
         return "book-details";
     }
 }

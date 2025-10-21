@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>My Holds - IU Cat</title>
+    <link rel="stylesheet" type="text/css" th:href="@{/css/styles.css}">
+    <style>
+        .hold-card {
+            background: white;
+            padding: 20px;
+            border: 1px solid #ddd;
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
+        
+        .hold-card.ready {
+            border-left: 5px solid #28a745;
+            background-color: #f0fff4;
+        }
+        
+        .hold-card.pending {
+            border-left: 5px solid #ffc107;
+            background-color: #fffef0;
+        }
+        
+        .hold-status {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 3px;
+            font-weight: bold;
+            font-size: 0.9em;
+            margin-bottom: 10px;
+        }
+        
+        .hold-status.ready {
+            background-color: #28a745;
+            color: white;
+        }
+        
+        .hold-status.pending {
+            background-color: #ffc107;
+            color: #333;
+        }
+        
+        .hold-info-row {
+            margin: 8px 0;
+            color: #666;
+        }
+        
+        .hold-actions {
+            margin-top: 15px;
+            display: flex;
+            gap: 10px;
+        }
+        
+        .expiration-warning {
+            background-color: #fff3cd;
+            border: 1px solid #ffc107;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            color: #856404;
+        }
+        
+        .queue-position {
+            font-size: 1.2em;
+            color: #990000;
+            font-weight: bold;
+        }
+        
+        .no-holds {
+            text-align: center;
+            padding: 40px;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        
+        .section-divider {
+            margin: 30px 0 20px 0;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <h1>IU Cat Library</h1>
+        <div>
+            <a href="/search">Search</a>
+            <a href="/my-rentals">My Rentals</a>
+            <a href="/my-holds">My Holds</a>
+            <a href="/logout" class="logout-btn">Logout</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h2>My Holds</h2>
+        
+        <div th:if="${param.success != null}" class="message">
+            <span th:if="${param.success[0] == 'placed'}">
+                Hold placed successfully! You've been added to the queue.
+            </span>
+            <span th:if="${param.success[0] == 'cancelled'}">
+                Hold cancelled successfully.
+            </span>
+        </div>
+        
+        <div th:if="${param.error != null}" class="error">
+            <span th:if="${param.error[0] == 'unauthorized'}">
+                You are not authorized to perform this action.
+            </span>
+            <span th:if="${param.error[0] == 'notReady'}">
+                This hold is not ready for pickup yet.
+            </span>
+            <span th:if="${param.error[0] == 'expired'}">
+                This hold has expired. Please place a new hold if you still want this book.
+            </span>
+            <span th:if="${param.error[0] == 'true'}">
+                An error occurred. Please try again.
+            </span>
+        </div>
+        
+        <div th:if="${holds != null && !holds.isEmpty()}">
+            <div th:with="readyHolds=${holds.?[status == 'ready']}">
+                <div th:if="${!readyHolds.isEmpty()}">
+                    <h3 style="color: #28a745;">Ready for Pickup</h3>
+                    <div th:each="hold : ${readyHolds}" class="hold-card ready">
+                        <span class="hold-status ready">READY</span>
+                        
+                        <h4 th:text="${hold.book.title}">Book Title</h4>
+                        <p class="book-author">by <span th:text="${hold.book.author}">Author</span></p>
+                        <p class="book-isbn">ISBN: <span th:text="${hold.book.isbn}">ISBN</span></p>
+                        
+                        <div class="expiration-warning">
+                            ⚠️ <strong>Pick up by: <span th:text="${hold.expirationDate}">Date</span></strong>
+                            <br>
+                            Your hold will expire if not picked up by this date.
+                        </div>
+                        
+                        <div class="hold-info-row">
+                            Hold placed: <span th:text="${hold.holdDate}">Date</span>
+                        </div>
+                        
+                        <div class="hold-actions">
+                            <form th:action="@{/holds/pickup/{id}(id=${hold.id})}" method="post" style="display: inline;">
+                                <button type="submit" class="btn btn-primary">Pick Up / Rent Now</button>
+                            </form>
+                            <form th:action="@{/holds/cancel/{id}(id=${hold.id})}" method="post" style="display: inline;"
+                                  onsubmit="return confirm('Are you sure you want to cancel this hold?');">
+                                <button type="submit" class="btn btn-secondary">Cancel Hold</button>
+                            </form>
+                        </div>
+                    </div>
+                    
+                    <div class="section-divider"></div>
+                </div>
+            </div>
+            
+            <div th:with="pendingHolds=${holds.?[status == 'pending']}">
+                <div th:if="${!pendingHolds.isEmpty()}">
+                    <h3 style="color: #ffc107;">Pending Holds</h3>
+                    <div th:each="hold : ${pendingHolds}" class="hold-card pending">
+                        <span class="hold-status pending">PENDING</span>
+                        
+                        <h4 th:text="${hold.book.title}">Book Title</h4>
+                        <p class="book-author">by <span th:text="${hold.book.author}">Author</span></p>
+                        <p class="book-isbn">ISBN: <span th:text="${hold.book.isbn}">ISBN</span></p>
+                        
+                        <div class="hold-info-row">
+                            Your position in queue: <span class="queue-position">#<span th:text="${hold.queuePosition}">1</span></span>
+                        </div>
+                        
+                        <div class="hold-info-row">
+                            Hold placed: <span th:text="${hold.holdDate}">Date</span>
+                        </div>
+                        
+                        <div class="hold-info-row" style="font-style: italic; color: #666;">
+                            You will be notified when the book becomes available for pickup.
+                        </div>
+                        
+                        <div class="hold-actions">
+                            <a th:href="@{/books/{id}(id=${hold.book.id})}" class="btn btn-secondary">View Book Details</a>
+                            <form th:action="@{/holds/cancel/{id}(id=${hold.id})}" method="post" style="display: inline;"
+                                  onsubmit="return confirm('Are you sure you want to cancel this hold?');">
+                                <button type="submit" class="btn btn-secondary">Cancel Hold</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div th:if="${holds == null || holds.isEmpty()}" class="no-holds">
+            <h3>You have no active holds</h3>
+            <p>When all copies of a book are checked out, you can place a hold to reserve your spot in line.</p>
+            <a href="/search" class="btn btn-primary" style="margin-top: 20px;">Browse Books</a>
+        </div>
+    </div>
+</body>
+</html>

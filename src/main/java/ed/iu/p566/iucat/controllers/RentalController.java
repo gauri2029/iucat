@@ -1,8 +1,10 @@
 package ed.iu.p566.iucat.controllers;
 
 import ed.iu.p566.iucat.data.BookRepository;
+import ed.iu.p566.iucat.data.HoldRepository;
 import ed.iu.p566.iucat.data.RentalRepository;
 import ed.iu.p566.iucat.model.Book;
+import ed.iu.p566.iucat.model.Hold;
 import ed.iu.p566.iucat.model.Rental;
 import ed.iu.p566.iucat.model.User;
 import jakarta.servlet.http.HttpSession;
@@ -24,6 +26,9 @@ public class RentalController {
     
     @Autowired
     private BookRepository bookRepository;
+    
+    @Autowired
+    private HoldRepository holdRepository;
     
     @PostMapping("/rent/{bookId}")
     public String rentBook(@PathVariable Long bookId, HttpSession session) {
@@ -70,8 +75,26 @@ public class RentalController {
             rentalRepository.save(rental);
             
             Book book = rental.getBook();
-            book.incrementAvailableCopies();
-            bookRepository.save(book);
+            
+            List<Hold> pendingHolds = holdRepository.findByBookAndStatusOrderByQueuePosition(book, "pending");
+            
+            if (!pendingHolds.isEmpty()) {
+                Hold firstHold = pendingHolds.get(0);
+                firstHold.setStatus("ready");
+                firstHold.setExpirationDate(LocalDate.now().plusDays(7));
+                firstHold.setQueuePosition(0);
+                holdRepository.save(firstHold);
+                
+                for (int i = 1; i < pendingHolds.size(); i++) {
+                    Hold h = pendingHolds.get(i);
+                    h.setQueuePosition(i);
+                    holdRepository.save(h);
+                }
+                
+            } else {
+                book.incrementAvailableCopies();
+                bookRepository.save(book);
+            }
             
             return "redirect:/my-rentals?success=returned";
         } catch (Exception e) {
