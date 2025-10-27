@@ -1,42 +1,47 @@
 # 📚 IU CAT – Library Management System
 
+![CI/CD Pipeline](https://github.com/YOUR_USERNAME/iucat/actions/workflows/ci-cd.yml/badge.svg)
+![Docker Image](https://img.shields.io/docker/v/YOUR_USERNAME/iucat-library?label=docker)
+![Java](https://img.shields.io/badge/Java-17-orange)
+![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.6-brightgreen)
+
 A full-stack **Spring Boot web application** for managing a university library system.  
 It allows users to **search, rent, and return books** with secure authentication and real-time availability tracking.
 
 ---
 
-## Live Demo  
+## 🚀 Live Demo  
 🔗 **https://iucat-library.onrender.com/**
 
-Project- https://dashboard.render.com/web/srv-d3ms7f95pdvs738fnbbg
+## 📊 CI/CD Pipeline
 
----
+This project uses GitHub Actions for continuous integration and deployment:
 
-## Features
+- ✅ **Automated Testing**: Tests run on every push
+- ✅ **Docker Build**: Automatic Docker image creation
+- ✅ **Deployment**: Auto-deploy to Render.com
 
-- **User Authentication & Roles**
-- **Book Catalog & Search**
-  - Search by title, author, or ISBN (case-insensitive)
-  - View available copies
-- **Book Rental System**
-  - Rent and return books
-  - Tracks due dates and overdue items
-- **Database Integration**
-  - JPA + SQLite
-- **Dockerized Deployment**
-  - Multi-stage Docker build for production
+### Pipeline Status
 
----
+| Stage | Status |
+|-------|--------|
+| Build & Test | ![Build](https://github.com/gauri2029/iucat/actions/workflows/ci-cd.yml/badge.svg) |
+| Docker Image | [View on Docker Hub](https://hub.docker.com/r/YOUR_USERNAME/iucat-library) |
+| Deployment | [Render.com Dashboard](https://dashboard.render.com) |
 
-## Tech Stack
+### Deployment Process
+The project uses a multi-stage CI/CD pipeline:
 
-| Layer | Technology |
-|-------|-------------|
-| **Backend** | Java 17, Spring Boot, Spring Data JPA |
-| **Frontend** | Thymeleaf, HTML, CSS |
-| **Database** | SQLite / H2 (for local dev) |
-| **Build Tool** | Maven |
-| **Containerization** | Docker |
-| **Deployment** | Render.com |
+**Stage 1: Build & Test**
+- Checkout code
+- Compile application
+- Run unit tests
 
----
+**Stage 2: Docker Build**
+- Build Docker image (multi-stage)
+- Push to Docker Hub
+- Enable layer caching
+
+**Stage 3: Deploy**
+- Trigger Render.com deployment
+- Verify deployment status
