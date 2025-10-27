@@ -1,7 +1,6 @@
 # 📚 IU CAT – Library Management System
 
-![CI/CD Pipeline](https://github.com/YOUR_USERNAME/iucat/actions/workflows/ci-cd.yml/badge.svg)
-![Docker Image](https://img.shields.io/docker/v/YOUR_USERNAME/iucat-library?label=docker)
+![CI/CD Pipeline](https://github.com/gauri2029/iucat/actions/workflows/ci-cd.yml)
 ![Java](https://img.shields.io/badge/Java-17-orange)
 ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.6-brightgreen)
 
