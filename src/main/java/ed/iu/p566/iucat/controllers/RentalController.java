@@ -55,6 +55,56 @@ public class RentalController {
             return "redirect:/books/" + bookId + "?error=true";
         }
     }
+
+    @PostMapping("/extend/{rentalId}")
+    public String extendRental(@PathVariable Long rentalId, HttpSession session) {
+        User loggedInUser = (User) session.getAttribute("loggedInUser");
+        if (loggedInUser == null) {
+            return "redirect:/login";
+        }
+        
+        try {
+            Rental rental = rentalRepository.findById(rentalId)
+                .orElseThrow(() -> new RuntimeException("Rental not found"));
+            
+            if (!rental.getUser().getId().equals(loggedInUser.getId())) {
+                return "redirect:/my-rentals?error=unauthorized";
+            }
+            
+            if ("returned".equals(rental.getStatus())) {
+                return "redirect:/my-rentals?error=alreadyReturned";
+            }
+            
+            if (rental.isOverdue()) {
+                return "redirect:/my-rentals?error=overdue";
+            }
+
+            if (rental.isExtensionLimitReached()) {
+                return "redirect:/my-rentals?error=extensionLimit";
+            }
+            
+            // checking holds here
+            Book book = rental.getBook();
+            Long pendingHoldsCount = holdRepository.countPendingHoldsByBook(book);
+            
+            if (pendingHoldsCount > 0) {
+                return "redirect:/my-rentals?error=holdsExist";
+            }
+            
+            boolean extended = rental.extendDueDate();
+            
+            if (extended) {
+                rentalRepository.save(rental);
+                return "redirect:/my-rentals?success=extended";
+            } else {
+                return "redirect:/my-rentals?error=cannotExtend";
+            }
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "redirect:/my-rentals?error=true";
+        }
+    }
     
     @PostMapping("/return/{rentalId}")
     public String returnBook(@PathVariable Long rentalId, HttpSession session) {

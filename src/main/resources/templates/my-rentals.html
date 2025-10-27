@@ -4,6 +4,46 @@
     <meta charset="UTF-8">
     <title>My Rentals - IU Cat</title>
     <link rel="stylesheet" type="text/css" th:href="@{/css/styles.css}">
+    <style>
+        .extension-info {
+            background-color: #e6f3ff;
+            border: 1px solid #0066cc;
+            padding: 8px 12px;
+            margin: 10px 0;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+        
+        .extension-button {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9em;
+        }
+        
+        .extension-button:hover {
+            background-color: #218838;
+        }
+        
+        .extension-button:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+        
+        .extension-limit {
+            color: #856404;
+            background-color: #fff3cd;
+            border: 1px solid #ffeeba;
+            padding: 8px 12px;
+            margin: 10px 0;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+    </style>
 </head>
 <body>
     <nav class="navbar">
@@ -11,6 +51,7 @@
         <div>
             <a href="/search">Search</a>
             <a href="/my-rentals">My Rentals</a>
+            <a href="/my-holds">My Holds</a>
             <a href="/logout" class="logout-btn">Logout</a>
         </div>
     </nav>
@@ -19,11 +60,36 @@
         <h2>My Active Rentals</h2>
         
         <div th:if="${param.success != null}" class="message">
-            Book returned successfully!
+            <span th:if="${param.success[0] == 'returned'}">
+                Book returned successfully!
+            </span>
+            <span th:if="${param.success[0] == 'extended'}">
+                Book rent date extended successfully! New due date applied.
+            </span>
         </div>
         
         <div th:if="${param.error != null}" class="error">
-            An error occurred. Please try again.
+            <span th:if="${param.error[0] == 'unauthorized'}">
+                You are not authorized to perform this action.
+            </span>
+            <span th:if="${param.error[0] == 'alreadyReturned'}">
+                This book has already been returned.
+            </span>
+            <span th:if="${param.error[0] == 'overdue'}">
+                Cannot extend overdue rentals. Please return the book.
+            </span>
+            <span th:if="${param.error[0] == 'extensionLimit'}">
+                Extension limit reached. You've already extended this rental.
+            </span>
+            <span th:if="${param.error[0] == 'holdsExist'}">
+                Cannot extend, other users have placed holds on this book.
+            </span>
+            <span th:if="${param.error[0] == 'cannotExtend'}">
+                Unable to extend this rental at this time.
+            </span>
+            <span th:if="${param.error[0] == 'true'}">
+                An error occurred. Please try again.
+            </span>
         </div>
         
         <div th:if="${rentals != null && !rentals.isEmpty()}">
@@ -31,11 +97,47 @@
                 <h4 th:text="${rental.book.title}">Book Title</h4>
                 <p class="book-author">by <span th:text="${rental.book.author}">Author</span></p>
                 <p class="book-isbn">ISBN: <span th:text="${rental.book.isbn}">ISBN</span></p>
-                <p>Rented on: <span th:text="${rental.rentalDate}">Date</span></p>
-                <p>Due date: <span th:text="${rental.dueDate}">Date</span></p>
-                <form th:action="@{/return/{id}(id=${rental.id})}" method="post" style="margin-top: 10px;">
-                    <button type="submit" class="btn btn-primary">Return Book</button>
-                </form>
+                <p>Rented on: <span th:text="${rental.rentalDate}">Date</span>
+                </p>
+                <p>
+                    <strong>Due date:</strong> 
+                    <span th:text="${rental.dueDate}">Date</span>
+                    <span th:if="${rental.isOverdue()}" style="color: #dc3545; font-weight: bold;">
+                        (OVERDUE)
+                    </span>
+                </p>
+                
+                <div th:if="${rental.extensionCount > 0}" class="extension-info">
+                    Extended <span th:text="${rental.extensionCount}">0</span> time
+                </div>
+                
+                <div th:if="${rental.isExtensionLimitReached()}" class="extension-limit">
+                    Extension limit reached.
+                </div>
+                
+                <div style="margin-top: 15px; display: flex; gap: 10px; flex-wrap: wrap;">
+                    <form th:action="@{/return/{id}(id=${rental.id})}" method="post" style="display: inline;">
+                        <button type="submit" class="btn btn-primary">Return Book</button>
+                    </form>
+                    
+                    <form th:if="${rental.canExtend()}" 
+                          th:action="@{/extend/{id}(id=${rental.id})}" 
+                          method="post" 
+                          style="display: inline;"
+                          onsubmit="return confirm('Extend due date by 14 days?');">
+                        <button type="submit" class="extension-button">
+                            Extend Due Date
+                        </button>
+                        <small style="display: block; color: #666; margin-top: 5px;">
+                            <span th:text="${rental.getRemainingExtensions()}">1</span> extension remaining
+                        </small>
+                    </form>
+                    
+                    <div th:if="${!rental.canExtend() && !rental.isExtensionLimitReached() && !rental.isOverdue()}" 
+                         style="color: #856404; font-size: 0.9em;">
+                         Extension not available
+                    </div>
+                </div>
             </div>
         </div>
         
