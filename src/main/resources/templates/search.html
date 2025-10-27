@@ -69,6 +69,7 @@
         .filter-option a {
             color: #333;
             text-decoration: none;
+            transition: all 0.2s ease;
         }
 
         .filter-option a:hover {
@@ -83,6 +84,7 @@
 
         .results-container {
             flex: 1;
+            position: relative;
         }
 
         .clear-filters {
@@ -96,6 +98,51 @@
             color: #990000;
             text-decoration: none;
             font-weight: bold;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #990000;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        #loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            border-radius: 4px;
+        }
+        
+         /* just adding some transition for cards upon reload */
+        .book-card {
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
     </style>
 </head>
@@ -142,20 +189,22 @@
             <h2>Use the search box to find books by title, author, or ISBN.</h2>
         </div>
 
-        <div th:if="${searched == true}" class="main-content">
+        <div th:if="${searched == true}" class="main-content" id="main-content">
             <div th:if="${books != null && !books.isEmpty()}" class="sidebar">
                 <h3>Refine Your Search</h3>
 
                 <div th:if="${selectedAuthor != null or selectedSubject != null or selectedFormat != null or selectedLanguage != null or selectedYear != null or (availableOnly != null and availableOnly)}"
                     class="clear-filters">
-                    <a th:href="@{/search(query=${query}, searchField=${searchField})}">✕ Clear All Filters</a>
+                    <a href="#" class="clear-filters-link" 
+                       th:attr="data-url=@{/search(query=${query}, searchField=${searchField})}">✕ Clear All Filters</a>
                 </div>
 
                 <div class="filter-section" th:if="${filterAuthors != null && !filterAuthors.isEmpty()}">
                     <h4>Author</h4>
                     <div th:each="author : ${filterAuthors}" class="filter-option"
                         th:classappend="${selectedAuthor != null && selectedAuthor == author} ? 'active' : ''">
-                        <a th:href="@{/search(query=${query}, searchField=${searchField}, filterAuthor=${author}, 
+                        <a href="#" class="filter-link"
+                           th:attr="data-url=@{/search(query=${query}, searchField=${searchField}, filterAuthor=${author}, 
                                    filterSubject=${selectedSubject}, filterFormat=${selectedFormat}, 
                                    filterLanguage=${selectedLanguage}, filterYear=${selectedYear}, availableOnly=${availableOnly})}"
                             th:text="${author}">Author Name</a>
@@ -166,17 +215,20 @@
                     <h4>Subject</h4>
                     <div th:each="subject : ${filterSubjects}" class="filter-option"
                         th:classappend="${selectedSubject != null && selectedSubject == subject} ? 'active' : ''">
-                        <a th:href="@{/search(query=${query}, searchField=${searchField}, filterAuthor=${selectedAuthor}, 
+                        <a href="#" class="filter-link"
+                           th:attr="data-url=@{/search(query=${query}, searchField=${searchField}, filterAuthor=${selectedAuthor}, 
                                    filterSubject=${subject}, filterFormat=${selectedFormat}, 
                                    filterLanguage=${selectedLanguage}, filterYear=${selectedYear}, availableOnly=${availableOnly})}"
                             th:text="${subject}">Subject</a>
                     </div>
                 </div>
+                
                 <div class="filter-section" th:if="${filterFormats != null && !filterFormats.isEmpty()}">
                     <h4>Format</h4>
                     <div th:each="format : ${filterFormats}" class="filter-option"
                         th:classappend="${selectedFormat != null && selectedFormat == format} ? 'active' : ''">
-                        <a th:href="@{/search(query=${query}, searchField=${searchField}, filterAuthor=${selectedAuthor}, 
+                        <a href="#" class="filter-link"
+                           th:attr="data-url=@{/search(query=${query}, searchField=${searchField}, filterAuthor=${selectedAuthor}, 
                                    filterSubject=${selectedSubject}, filterFormat=${format}, 
                                    filterLanguage=${selectedLanguage}, filterYear=${selectedYear}, availableOnly=${availableOnly})}"
                             th:text="${format}">Format</a>
@@ -187,7 +239,8 @@
                     <h4>Language</h4>
                     <div th:each="language : ${filterLanguages}" class="filter-option"
                         th:classappend="${selectedLanguage != null && selectedLanguage == language} ? 'active' : ''">
-                        <a th:href="@{/search(query=${query}, searchField=${searchField}, filterAuthor=${selectedAuthor}, 
+                        <a href="#" class="filter-link"
+                           th:attr="data-url=@{/search(query=${query}, searchField=${searchField}, filterAuthor=${selectedAuthor}, 
                                    filterSubject=${selectedSubject}, filterFormat=${selectedFormat}, 
                                    filterLanguage=${language}, filterYear=${selectedYear}, availableOnly=${availableOnly})}"
                             th:text="${language}">Language</a>
@@ -198,7 +251,8 @@
                     <h4>Publication Year</h4>
                     <div th:each="year : ${filterYears}" class="filter-option"
                         th:classappend="${selectedYear != null && selectedYear == year} ? 'active' : ''">
-                        <a th:href="@{/search(query=${query}, searchField=${searchField}, filterAuthor=${selectedAuthor}, 
+                        <a href="#" class="filter-link"
+                           th:attr="data-url=@{/search(query=${query}, searchField=${searchField}, filterAuthor=${selectedAuthor}, 
                                    filterSubject=${selectedSubject}, filterFormat=${selectedFormat}, 
                                    filterLanguage=${selectedLanguage}, filterYear=${year}, availableOnly=${availableOnly})}"
                             th:text="${year}">Year</a>
@@ -208,8 +262,8 @@
                 <div class="filter-section">
                     <h4>Availability</h4>
                     <div class="filter-option" th:classappend="${availableOnly} ? 'active' : ''">
-                        <a
-                            th:href="@{/search(query=${query}, searchField=${searchField}, filterAuthor=${selectedAuthor}, 
+                        <a href="#" class="filter-link"
+                           th:attr="data-url=@{/search(query=${query}, searchField=${searchField}, filterAuthor=${selectedAuthor}, 
                                    filterSubject=${selectedSubject}, filterFormat=${selectedFormat}, 
                                    filterLanguage=${selectedLanguage}, filterYear=${selectedYear}, availableOnly=true)}">
                             ✓ Available Now
@@ -218,7 +272,7 @@
                 </div>
             </div>
 
-            <div class="results-container">
+            <div class="results-container" id="results-container">
                 <div th:if="${books != null && !books.isEmpty()}" class="results-section">
                     <h3>Search Results</h3>
                     <p class="results-count">
@@ -254,5 +308,104 @@
             </div>
         </div>
     </div>
+
+    <script th:inline="javascript">
+        document.addEventListener('DOMContentLoaded', function() {
+            function attachFilterListeners() {
+                const filterLinks = document.querySelectorAll('.filter-link');
+                const clearFiltersLink = document.querySelector('.clear-filters-link');
+                
+                filterLinks.forEach(function(link) {
+                    link.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        const url = this.getAttribute('data-url');
+                        loadSearchResults(url);
+                    });
+                });
+                
+                if (clearFiltersLink) {
+                    clearFiltersLink.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        const url = this.getAttribute('data-url');
+                        loadSearchResults(url);
+                    });
+                }
+            }
+            
+            function loadSearchResults(url) {
+                showLoadingIndicator();
+                
+                fetch(url, {
+                    method: 'GET',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(function(response) {
+                    console.log('Response received, status: ' + response.status);
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.text();
+                })
+                .then(function(html) {
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+                    
+                    const newMainContent = doc.querySelector('#main-content');
+                    const currentMainContent = document.querySelector('#main-content');
+                    
+                    if (newMainContent && currentMainContent) {
+                        currentMainContent.innerHTML = newMainContent.innerHTML;
+                        
+                        attachFilterListeners();
+                        
+                        window.history.pushState({}, '', url);
+                        
+                        currentMainContent.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        
+                    } else {
+                        console.error('Could not find main-content in response');
+                    }
+                    
+                    hideLoadingIndicator();
+                })
+                .catch(function(error) {
+                    console.error('Error loading search results:', error);
+                    hideLoadingIndicator();
+                    alert('Error loading search results. Please try again.');
+                });
+            }
+            
+            function showLoadingIndicator() {
+                const resultsContainer = document.querySelector('#results-container');
+                if (resultsContainer) {
+                    const existing = document.querySelector('#loading-overlay');
+                    if (existing) {
+                        existing.remove();
+                    }
+                    
+                    const loadingDiv = document.createElement('div');
+                    loadingDiv.id = 'loading-overlay';
+                    loadingDiv.innerHTML = '<div style="text-align: center;"><div class="spinner"></div><p style="margin-top: 10px; color: #990000; font-weight: bold;">Loading results...</p></div>';
+                    resultsContainer.style.position = 'relative';
+                    resultsContainer.appendChild(loadingDiv);
+                }
+            }
+            
+            function hideLoadingIndicator() {
+                const loadingOverlay = document.querySelector('#loading-overlay');
+                if (loadingOverlay) {
+                    loadingOverlay.remove();
+                }
+            }
+            
+            window.addEventListener('popstate', function(event) {
+                location.reload();
+            });
+            
+            attachFilterListeners();
+        });
+    </script>
 </body>
 </html>
