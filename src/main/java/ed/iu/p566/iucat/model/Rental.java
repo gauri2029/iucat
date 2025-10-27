@@ -31,6 +31,13 @@ public class Rental {
     @Column(nullable = false)
     private String status;
     
+    @Column(name = "extension_count", nullable = false)
+    private Integer extensionCount = 0;
+    
+    private static final int MAX_EXTENSIONS = 1;
+    
+    private static final int EXTENSION_DAYS = 14;
+    
     public Rental() {}
     
     public Rental(User user, Book book, LocalDate rentalDate, LocalDate dueDate) {
@@ -39,6 +46,7 @@ public class Rental {
         this.rentalDate = rentalDate;
         this.dueDate = dueDate;
         this.status = "active";
+        this.extensionCount = 0;
     }
     
     public boolean isOverdue() {
@@ -48,6 +56,31 @@ public class Rental {
     public void markReturned() {
         this.returnDate = LocalDate.now();
         this.status = "returned";
+    }
+    
+    public boolean canExtend() {
+        return "active".equals(this.status) 
+            && this.returnDate == null
+            && !this.isOverdue()
+            && this.extensionCount < MAX_EXTENSIONS;
+    }
+    
+    public boolean extendDueDate() {
+        if (!canExtend()) {
+            return false;
+        }
+        
+        this.dueDate = this.dueDate.plusDays(EXTENSION_DAYS);
+        this.extensionCount++;
+        return true;
+    }
+    
+    public boolean isExtensionLimitReached() {
+        return this.extensionCount >= MAX_EXTENSIONS;
+    }
+
+    public int getRemainingExtensions() {
+        return Math.max(0, MAX_EXTENSIONS - this.extensionCount);
     }
     
     public Long getId() {
@@ -104,5 +137,21 @@ public class Rental {
     
     public void setStatus(String status) {
         this.status = status;
+    }
+    
+    public Integer getExtensionCount() {
+        return extensionCount;
+    }
+    
+    public void setExtensionCount(Integer extensionCount) {
+        this.extensionCount = extensionCount;
+    }
+    
+    public static int getMaxExtensions() {
+        return MAX_EXTENSIONS;
+    }
+    
+    public static int getExtensionDays() {
+        return EXTENSION_DAYS;
     }
 }
