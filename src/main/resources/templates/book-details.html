@@ -25,6 +25,15 @@
             border-radius: 4px;
         }
         
+        .user-rental-status {
+            background-color: #e6ffe6;
+            border: 1px solid #28a745;
+            padding: 12px;
+            margin: 15px 0;
+            border-radius: 4px;
+            color: #155724;
+        }
+        
         .alert-error {
             background-color: #ffe6e6;
             border: 1px solid #cc0000;
@@ -62,6 +71,9 @@
         <div th:if="${param.error != null}" class="alert-error">
             <span th:if="${param.error[0] == 'alreadyHold'}">
                 You already have an active hold for this book.
+            </span>
+            <span th:if="${param.error[0] == 'alreadyRented'}">
+                You already have this book rented. You cannot place a hold on a book you're currently renting.
             </span>
             <span th:if="${param.error[0] == 'true'}">
                 An error occurred. Please try again.
@@ -112,6 +124,16 @@
                 </strong>
             </div>
             
+            <div th:if="${userRental != null}" class="user-rental-status">
+                <strong> You currently have this book rented </strong>
+                <br>
+                <small>
+                    Due date: <span th:text="${userRental.dueDate}"></span>
+                    <br>
+                    <a href="/my-rentals" style="color: #155724; text-decoration: underline;">Go to My Rentals</a>
+                </small>
+            </div>
+            
             <div th:if="${userHold != null}" class="user-hold-status">
                 <span th:if="${userHold.status == 'pending'}">
                     ✓ You have a hold on this book. You are <strong>#<span th:text="${userHold.queuePosition}"></span></strong> in the queue.
@@ -123,13 +145,13 @@
             
             <div class="book-details-actions">
                 <span th:if="${session.loggedInUser != null}">
-                    <form th:if="${book.availableCopies > 0}" 
+                    <form th:if="${book.availableCopies > 0 && userRental == null}" 
                           th:action="@{/rent/{id}(id=${book.id})}" 
                           method="post" style="display: inline;">
                         <button type="submit" class="btn btn-primary btn-large">Rent This Book</button>
                     </form>
                     
-                    <form th:if="${book.availableCopies == 0 && userHold == null}" 
+                    <form th:if="${book.availableCopies == 0 && userHold == null && userRental == null}" 
                           th:action="@{/holds/place/{id}(id=${book.id})}" 
                           method="post" style="display: inline;">
                         <button type="submit" class="btn btn-secondary btn-large">Place Hold</button>

@@ -1,5 +1,6 @@
 package ed.iu.p566.iucat.data;
 
+import ed.iu.p566.iucat.model.Book;
 import ed.iu.p566.iucat.model.Rental;
 import ed.iu.p566.iucat.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -31,4 +32,11 @@ public interface RentalRepository extends JpaRepository<Rental, Long> {
     @Query("SELECT CASE WHEN COUNT(r) > 0 THEN true ELSE false END " +
            "FROM Rental r WHERE r.id = :rentalId AND r.user.id = :userId")
     boolean existsByIdAndUserId(@Param("rentalId") Long rentalId, @Param("userId") Long userId);
+    
+    @Query("SELECT r FROM Rental r WHERE r.user = :user AND r.book = :book AND r.status = 'active'")
+    Optional<Rental> findActiveRentalByUserAndBook(@Param("user") User user, @Param("book") Book book);
+    
+    @Query("SELECT CASE WHEN COUNT(r) > 0 THEN true ELSE false END " +
+           "FROM Rental r WHERE r.user = :user AND r.book = :book AND r.status = 'active'")
+    boolean hasActiveRental(@Param("user") User user, @Param("book") Book book);
 }

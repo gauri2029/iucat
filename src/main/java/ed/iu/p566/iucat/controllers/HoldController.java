@@ -42,6 +42,12 @@ public class HoldController {
             Book book = bookRepository.findById(bookId)
                 .orElseThrow(() -> new RuntimeException("Book not found"));
             
+            // bug fix- checking if user has active book rentals
+            boolean hasActiveRental = rentalRepository.hasActiveRental(loggedInUser, book);
+            if (hasActiveRental) {
+                return "redirect:/books/" + bookId + "?error=alreadyRented";
+            }
+            
             Optional<Hold> existingHold = holdRepository.findActiveHoldByUserAndBook(loggedInUser, book);
             if (existingHold.isPresent()) {
                 return "redirect:/books/" + bookId + "?error=alreadyHold";

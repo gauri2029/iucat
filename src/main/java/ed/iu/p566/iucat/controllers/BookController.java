@@ -2,8 +2,10 @@ package ed.iu.p566.iucat.controllers;
 
 import ed.iu.p566.iucat.data.BookRepository;
 import ed.iu.p566.iucat.data.HoldRepository;
+import ed.iu.p566.iucat.data.RentalRepository;
 import ed.iu.p566.iucat.model.Book;
 import ed.iu.p566.iucat.model.Hold;
+import ed.iu.p566.iucat.model.Rental;
 import ed.iu.p566.iucat.model.User;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,11 +24,13 @@ public class BookController {
 
     private final BookRepository bookRepository;
     private final HoldRepository holdRepository;
+    private final RentalRepository rentalRepository;
 
     @Autowired
-    public BookController(BookRepository bookRepository, HoldRepository holdRepository) {
+    public BookController(BookRepository bookRepository, HoldRepository holdRepository, RentalRepository rentalRepository) {
         this.bookRepository = bookRepository;
         this.holdRepository = holdRepository;
+        this.rentalRepository = rentalRepository;
     }
 
     @GetMapping("/")
@@ -169,16 +173,26 @@ public class BookController {
         
         User loggedInUser = (User) session.getAttribute("loggedInUser");
         Hold userHold = null;
+        Rental userRental = null;
+        
         if (loggedInUser != null) {
+            // bug fix- checking for active hold
             Optional<Hold> holdOpt = holdRepository.findActiveHoldByUserAndBook(loggedInUser, book);
             if (holdOpt.isPresent()) {
                 userHold = holdOpt.get();
+            }
+            
+            // bug fixx- Check for active rental
+            Optional<Rental> rentalOpt = rentalRepository.findActiveRentalByUserAndBook(loggedInUser, book);
+            if (rentalOpt.isPresent()) {
+                userRental = rentalOpt.get();
             }
         }
         
         model.addAttribute("book", book);
         model.addAttribute("holdCount", holdCount);
         model.addAttribute("userHold", userHold);
+        model.addAttribute("userRental", userRental);
         
         return "book-details";
     }
