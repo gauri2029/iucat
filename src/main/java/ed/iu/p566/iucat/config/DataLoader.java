@@ -118,7 +118,7 @@ public class DataLoader implements CommandLineRunner {
             bookRepository.save(new Book("978-0375714832", "Maus", "Art Spiegelman", 1, 1991, "English", "Graphic Novel", "History"));
             bookRepository.save(new Book("978-0375423949", "Persepolis", "Marjane Satrapi", 2, 2003, "English", "Graphic Novel", "Biography"));
             
-            bookRepository.save(new Book("978-0062315007", "The Body Keeps the Score", "Bessel van der Kolk", 2, 2014, "English", "Book", "Psychology"));
+            bookRepository.save(new Book("978-0143127741", "The Body Keeps the Score", "Bessel van der Kolk", 2, 2014, "English", "Book", "Psychology"));
             bookRepository.save(new Book("978-0316478526", "Why We Sleep", "Matthew Walker", 3, 2017, "English", "Book", "Health"));
             bookRepository.save(new Book("978-0399563829", "Breath", "James Nestor", 1, 2020, "English", "Book", "Health"));
             
