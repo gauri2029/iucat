@@ -47,7 +47,7 @@ public class DataLoader implements CommandLineRunner {
             bookRepository.save(new Book("978-0131103627", "The C Programming Language", "Brian Kernighan", 2, 1988, "English", "Book", "Computer Science"));
             bookRepository.save(new Book("978-0201616224", "The Mythical Man-Month", "Frederick Brooks", 2, 1995, "English", "Book", "Computer Science"));
             bookRepository.save(new Book("978-0596517748", "Beautiful Code", "Andy Oram", 1, 2007, "English", "Book", "Computer Science"));
-            bookRepository.save(new Book("978-1449373320", "Designing Data-Intensive Applications", "Martin Kleppmann", 2, 2017, "English", "Book", "Computer Science"));
+            bookRepository.save(new Book("978-1449373325", "Designing Data-Intensive Applications", "Martin Kleppmann", 2, 2017, "English", "Book", "Computer Science"));
             bookRepository.save(new Book("978-0262033848", "Introduction to Algorithms", "Thomas Cormen", 3, 2009, "English", "Book", "Computer Science"));
             
             bookRepository.save(new Book("978-1491957660", "Deep Learning with Python", "François Chollet", 2, 2017, "English", "eBook", "Data Science"));
@@ -97,7 +97,7 @@ public class DataLoader implements CommandLineRunner {
             bookRepository.save(new Book("978-1680502862", "Programming Phoenix", "Chris McCord", 1, 2019, "English", "Book", "Web Development"));
             bookRepository.save(new Book("978-1492041146", "Vue.js: Up and Running", "Callum Macrae", 2, 2018, "English", "eBook", "Web Development"));
             
-            bookRepository.save(new Book("978-1449373320", "PostgreSQL: Up and Running", "Regina Obe", 2, 2017, "English", "Book", "Database"));
+            bookRepository.save(new Book("978-1491963418", "PostgreSQL: Up and Running", "Regina Obe", 2, 2017, "English", "Book", "Database"));
             bookRepository.save(new Book("978-0596809485", "MongoDB: The Definitive Guide", "Kristina Chodorow", 1, 2013, "English", "Book", "Database"));
             bookRepository.save(new Book("978-1449358063", "Redis in Action", "Josiah Carlson", 2, 2013, "English", "Book", "Database"));
             bookRepository.save(new Book("978-1491961414", "Site Reliability Engineering", "Niall Murphy", 1, 2016, "English", "Book", "DevOps"));
@@ -136,7 +136,7 @@ public class DataLoader implements CommandLineRunner {
             bookRepository.save(new Book("978-1484237717", "Unity in Action", "Joseph Hocking", 2, 2018, "English", "Book", "Game Development"));
             
             bookRepository.save(new Book("978-0393358919", "Capital in the Twenty-First Century", "Thomas Piketty", 1, 2014, "English", "Book", "Economics"));
-            bookRepository.save(new Book("978-0143115762", "Freakonomics", "Steven Levitt", 3, 2005, "English", "Book", "Economics"));
+            bookRepository.save(new Book("978-0060731328", "Freakonomics", "Steven Levitt", 3, 2005, "English", "Book", "Economics"));
             bookRepository.save(new Book("978-0060555665", "The Intelligent Investor", "Benjamin Graham", 2, 1949, "English", "Book", "Finance"));
             bookRepository.save(new Book("978-0812979183", "A Random Walk Down Wall Street", "Burton Malkiel", 1, 2019, "English", "Book", "Finance"));
             
