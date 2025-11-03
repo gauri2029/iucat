@@ -26,7 +26,7 @@ public interface RentalRepository extends JpaRepository<Rental, Long> {
            "AND r.status = 'active' " +
            "AND r.returnDate IS NULL " +
            "AND r.dueDate >= CURRENT_DATE " +
-           "AND r.extensionCount < 1")
+           "AND r.extensionCount < r.extensionLimit")
     List<Rental> findExtendableRentalsByUser(@Param("user") User user);
     
     @Query("SELECT CASE WHEN COUNT(r) > 0 THEN true ELSE false END " +

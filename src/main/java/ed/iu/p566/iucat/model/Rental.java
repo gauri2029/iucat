@@ -34,7 +34,8 @@ public class Rental {
     @Column(name = "extension_count", nullable = false)
     private Integer extensionCount = 0;
     
-    private static final int MAX_EXTENSIONS = 1;
+    @Column(name = "extension_limit", nullable = false)
+    private Integer extensionLimit = 2;
     
     private static final int EXTENSION_DAYS = 14;
     
@@ -47,6 +48,17 @@ public class Rental {
         this.dueDate = dueDate;
         this.status = "active";
         this.extensionCount = 0;
+        this.extensionLimit = 2; //defaut extension value
+    }
+    
+    public Rental(User user, Book book, LocalDate rentalDate, LocalDate dueDate, Integer extensionLimit) {
+        this.user = user;
+        this.book = book;
+        this.rentalDate = rentalDate;
+        this.dueDate = dueDate;
+        this.status = "active";
+        this.extensionCount = 0;
+        this.extensionLimit = extensionLimit;
     }
     
     public boolean isOverdue() {
@@ -62,7 +74,7 @@ public class Rental {
         return "active".equals(this.status) 
             && this.returnDate == null
             && !this.isOverdue()
-            && this.extensionCount < MAX_EXTENSIONS;
+            && this.extensionCount < this.extensionLimit;
     }
     
     public boolean extendDueDate() {
@@ -76,11 +88,11 @@ public class Rental {
     }
     
     public boolean isExtensionLimitReached() {
-        return this.extensionCount >= MAX_EXTENSIONS;
+        return this.extensionCount >= this.extensionLimit;
     }
 
     public int getRemainingExtensions() {
-        return Math.max(0, MAX_EXTENSIONS - this.extensionCount);
+        return Math.max(0, this.extensionLimit - this.extensionCount);
     }
     
     public Long getId() {
@@ -147,8 +159,12 @@ public class Rental {
         this.extensionCount = extensionCount;
     }
     
-    public static int getMaxExtensions() {
-        return MAX_EXTENSIONS;
+    public Integer getExtensionLimit() {
+        return extensionLimit;
+    }
+    
+    public void setExtensionLimit(Integer extensionLimit) {
+        this.extensionLimit = extensionLimit;
     }
     
     public static int getExtensionDays() {

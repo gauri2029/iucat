@@ -43,6 +43,22 @@
             border-radius: 4px;
             font-size: 0.9em;
         }
+        
+        .extension-progress {
+            font-size: 0.85em;
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        .extension-badge {
+            padding: 3px 8px;
+            background-color: #e6f3ff;
+            border: 1px solid #0066cc;
+            border-radius: 8px;
+            font-size: 0.8em;
+            font-weight: bold;
+            color: #0066cc;
+        }
     </style>
 </head>
 <body>
@@ -108,7 +124,13 @@
                 </p>
                 
                 <div th:if="${rental.extensionCount > 0}" class="extension-info">
-                    Extended <span th:text="${rental.extensionCount}">0</span> time
+                    <strong>Extensions used:</strong> 
+                    <span class="extension-badge">
+                        <span th:text="${rental.extensionCount}">0</span>/<span th:text="${rental.extensionLimit}">2</span>
+                    </span>
+                    <div class="extension-progress">
+                        <span th:text="${rental.getRemainingExtensions()}">1</span> extension(s) remaining
+                    </div>
                 </div>
                 
                 <div th:if="${rental.isExtensionLimitReached()}" class="extension-limit">
@@ -128,9 +150,6 @@
                         <button type="submit" class="extension-button">
                             Extend Due Date
                         </button>
-                        <small style="display: block; color: #666; margin-top: 5px;">
-                            <span th:text="${rental.getRemainingExtensions()}">1</span> extension remaining
-                        </small>
                     </form>
                     
                     <div th:if="${!rental.canExtend() && !rental.isExtensionLimitReached() && !rental.isOverdue()}" 
