@@ -81,7 +81,7 @@ public class AuthController {
                     ? user.getUsername() 
                     : user.getUsername() + "@iu.edu";
                 
-                logger.info("📧 Due date reminder email sent to: {} for book '{}' due on {}", 
+                logger.info("Due date reminder email sent to: {} for book '{}' due on {}", 
                             recipientEmail, rental.getBook().getTitle(), rental.getDueDate());
         }
     }
