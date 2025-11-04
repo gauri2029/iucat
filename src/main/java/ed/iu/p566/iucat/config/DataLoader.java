@@ -1,27 +1,40 @@
 package ed.iu.p566.iucat.config;
 
 import ed.iu.p566.iucat.data.BookRepository;
+import ed.iu.p566.iucat.data.RentalRepository;
 import ed.iu.p566.iucat.data.UserRepository;
 import ed.iu.p566.iucat.model.Book;
+import ed.iu.p566.iucat.model.Rental;
 import ed.iu.p566.iucat.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
+
+import java.time.LocalDate;
+import java.util.Optional;
 
 @Component
 public class DataLoader implements CommandLineRunner {
     
     private final BookRepository bookRepository;
     private final UserRepository userRepository;
+    private final RentalRepository rentalRepository;
     
     @Autowired
-    public DataLoader(BookRepository bookRepository, UserRepository userRepository) {
+    public DataLoader(BookRepository bookRepository, UserRepository userRepository, RentalRepository rentalRepository) {
         this.bookRepository = bookRepository;
         this.userRepository = userRepository;
+        this.rentalRepository = rentalRepository;
     }
     
     @Override
     public void run(String... args) throws Exception {
+        loadUsers();
+        loadBooks();
+        createTestRental();
+    }
+    
+    private void loadUsers() {
         if (userRepository.count() == 0) {
             userRepository.save(new User("abc", "password123", "USER"));
             userRepository.save(new User("pqr", "password123", "USER"));
@@ -29,10 +42,12 @@ public class DataLoader implements CommandLineRunner {
             userRepository.save(new User("demo2", "demo1234", "USER"));
             userRepository.save(new User("demo3", "demo12345", "USER"));
             userRepository.save(new User("demoUser", "demoUser123", "USER"));
+            userRepository.save(new User("gsmarkan@iu.edu", "password123", "USER"));
             userRepository.save(new User("admin", "adminpassword123", "ADMIN"));
             System.out.println("Sample users loaded into database!");
         }
-        
+    }
+    private void loadBooks() {
         if (bookRepository.count() == 0) {
             bookRepository.save(new Book("978-0134685991", "Effective Java", "Joshua Bloch", 3, 2018, "English", "Book", "Programming"));
             bookRepository.save(new Book("978-0596009205", "Head First Design Patterns", "Eric Freeman", 2, 2004, "English", "Book", "Programming"));
@@ -157,5 +172,28 @@ public class DataLoader implements CommandLineRunner {
             bookRepository.save(new Book("978-0060920043", "The Prophet", "Kahlil Gibran", 1, 1923, "English", "Book", "Poetry"));
             bookRepository.save(new Book("978-0143106968", "Man's Search for Meaning", "Viktor Frankl", 2, 1946, "English", "Book", "Philosophy"));
         }
+    }
+    
+    /**
+     * creating a test rental only for notification testing
+     */
+    private void createTestRental() {
+        Optional<User> userOpt = userRepository.findByUsername("gsmarkan@iu.edu");
+        User user = userOpt.get();
+        
+        LocalDate twoDaysFromNow = LocalDate.now().plusDays(2);
+        java.util.List<Rental> existingRentals = rentalRepository.findByUserAndStatus(user, "active");
+        
+        Optional<Book> bookOpt = bookRepository.findByIsbn("978-0134685991");
+        Book book = bookOpt.get();
+        
+        LocalDate rentalDate = LocalDate.now().minusDays(12);
+        LocalDate dueDate = LocalDate.now().plusDays(2);
+        
+        Rental testRental = new Rental(user, book, rentalDate, dueDate);
+        rentalRepository.save(testRental);
+        
+        book.decrementAvailableCopies();
+        bookRepository.save(book);
     }
 }

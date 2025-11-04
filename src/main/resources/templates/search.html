@@ -5,6 +5,43 @@
     <title>Search Books - IU Cat</title>
     <link rel="stylesheet" type="text/css" th:href="@{/css/styles.css}" />
     <style>
+        .alert-banner {
+            background-color: #fff3cd;
+            border: 2px solid #ffc107;
+            border-radius: 4px;
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .alert-banner.urgent {
+            background-color: #f8d7da;
+            border-color: #dc3545;
+        }
+        
+        .alert-content {
+            flex: 1;
+        }
+        
+        .alert-title {
+            font-weight: bold;
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+        
+        .alert-message {
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .alert-link {
+            color: #990000;
+            text-decoration: underline;
+            font-weight: bold;
+        }
+
         .search-container {
             display: flex;
             gap: 2rem;
@@ -153,6 +190,7 @@
             <a href="/search">Search</a>
             <span th:if="${session.loggedInUser != null}">
                 <a href="/my-rentals">My Rentals</a>
+                <a href="/my-holds">My Holds</a>
                 <a href="/logout" class="logout-btn">Logout</a>
             </span>
             <span th:if="${session.loggedInUser == null}">
@@ -162,6 +200,17 @@
     </nav>
 
     <div class="container">
+        <div th:if="${session.loggedInUser != null && dueSoonRentals != null && !dueSoonRentals.isEmpty()}" 
+             class="alert-banner urgent">
+            <div class="alert-content">
+                <div class="alert-title">Book Due Soon!</div>
+                <div class="alert-message">
+                    You have <strong th:text="${dueSoonRentals.size()}"></strong> book(s) due in 2 days.
+                    <a href="/my-rentals" class="alert-link">View My Rentals</a>
+                </div>
+            </div>
+        </div>
+
         <div class="search-box">
             <h2>Search for Books</h2>
             <form th:action="@{/search}" method="get" class="search-form">

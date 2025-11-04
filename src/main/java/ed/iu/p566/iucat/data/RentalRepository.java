@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
+import java.time.LocalDate;
 
 @Repository
 public interface RentalRepository extends JpaRepository<Rental, Long> {
@@ -39,4 +40,7 @@ public interface RentalRepository extends JpaRepository<Rental, Long> {
     @Query("SELECT CASE WHEN COUNT(r) > 0 THEN true ELSE false END " +
            "FROM Rental r WHERE r.user = :user AND r.book = :book AND r.status = 'active'")
     boolean hasActiveRental(@Param("user") User user, @Param("book") Book book);
+
+    @Query("SELECT r FROM Rental r WHERE r.dueDate = :dueDate AND r.status = 'active' AND r.returnDate IS NULL")
+    List<Rental> findRentalsDueOnDate(@Param("dueDate") LocalDate dueDate);
 }

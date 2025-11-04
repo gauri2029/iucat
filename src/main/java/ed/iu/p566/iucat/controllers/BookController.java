@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -48,7 +49,18 @@ public class BookController {
             @RequestParam(required = false) String filterLanguage,
             @RequestParam(required = false) Integer filterYear,
             @RequestParam(required = false) Boolean availableOnly,
+            HttpSession session,
             Model model) {
+
+        User loggedInUser = (User) session.getAttribute("loggedInUser");
+        if (loggedInUser != null) {
+            LocalDate twoDaysFromNow = LocalDate.now().plusDays(2);
+            List<Rental> allRentals = rentalRepository.findByUserAndStatus(loggedInUser, "active");
+            List<Rental> dueSoonRentals = allRentals.stream()
+                    .filter(r -> r.getDueDate().equals(twoDaysFromNow))
+                    .collect(Collectors.toList());
+            model.addAttribute("dueSoonRentals", dueSoonRentals);
+        }
 
         List<Book> books = null;
 
