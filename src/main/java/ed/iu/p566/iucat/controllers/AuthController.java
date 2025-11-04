@@ -3,8 +3,11 @@ import ed.iu.p566.iucat.data.RentalRepository;
 import ed.iu.p566.iucat.data.UserRepository;
 import ed.iu.p566.iucat.model.Rental;
 import ed.iu.p566.iucat.model.User;
-import ed.iu.p566.iucat.service.NotificationService;
+import ed.iu.p566.iucat.service.EmailService;
 import jakarta.servlet.http.HttpSession;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -24,9 +27,8 @@ public class AuthController {
     
     @Autowired
     private RentalRepository rentalRepository;
-    
-    @Autowired
-    private NotificationService notificationService;
+
+    private static final Logger logger = LoggerFactory.getLogger(EmailService.class);
     
     @GetMapping("/login")
     public String loginPage(@RequestParam(value = "error", required = false) String error,

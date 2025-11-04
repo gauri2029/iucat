@@ -1,7 +1,12 @@
-package ed.iu.p566.iucat.model;
+package ed.iu.p566.iucat;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import ed.iu.p566.iucat.model.Book;
+import ed.iu.p566.iucat.model.Rental;
+import ed.iu.p566.iucat.model.User;
+
 import java.time.LocalDate;
 import static org.junit.jupiter.api.Assertions.*;
 

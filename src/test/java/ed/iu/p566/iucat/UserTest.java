@@ -1,7 +1,10 @@
-package ed.iu.p566.iucat.model;
+package ed.iu.p566.iucat;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import ed.iu.p566.iucat.model.User;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class UserTest {
