@@ -38,3 +38,5 @@ iucat.db
 
 .DS_Store
 Thumbs.db
+
+apprunner-trust-policy.json
