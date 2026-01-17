@@ -46,8 +46,8 @@ jobs:
         path: target/*.jar
         retention-days: 30
 
-  docker-build:
-    name: Build and Push Docker Image
+  docker-build-render:
+    name: Build and Push Docker Image (Render)
     needs: build-and-test
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
@@ -75,7 +75,6 @@ jobs:
           type=raw,value=latest,enable={{is_default_branch}}
           
     - name: Build and push Docker image
-      id: docker_build
       uses: docker/build-push-action@v5
       with:
         context: .
@@ -85,9 +84,41 @@ jobs:
         cache-from: type=gha
         cache-to: type=gha,mode=max
 
-  deploy:
+  docker-build-aws:
+    name: Build and Push to ECR (AWS)
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ secrets.AWS_REGION }}
+        
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v2
+        
+    - name: Build, tag, and push image to Amazon ECR
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        ECR_REPOSITORY: iucat-library
+        IMAGE_TAG: ${{ github.sha }}
+      run: |
+        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+        docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:latest
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+
+  deploy-render:
     name: Deploy to Render.com
-    needs: docker-build
+    needs: docker-build-render
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     
@@ -101,3 +132,82 @@ jobs:
       run: |
         echo "Monitor at: https://dashboard.render.com"
         echo "App URL: https://iucat-library.onrender.com"
+
+  deploy-aws:
+    name: Deploy to AWS App Runner
+    needs: docker-build-aws
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    
+    steps:
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ secrets.AWS_REGION }}
+    
+    - name: Deploy to App Runner
+      run: |
+        # Check if service exists
+        SERVICE_ARN=$(aws apprunner list-services --query "ServiceSummaryList[?ServiceName=='iucat-library'].ServiceArn" --output text)
+        
+        if [ -z "$SERVICE_ARN" ]; then
+          echo "Creating new App Runner service..."
+          aws apprunner create-service \
+            --service-name iucat-library \
+            --source-configuration '{
+              "AuthenticationConfiguration": {
+                "AccessRoleArn": "arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/AppRunnerECRAccessRole"
+              },
+              "AutoDeploymentsEnabled": false,
+              "ImageRepository": {
+                "ImageIdentifier": "${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/iucat-library:latest",
+                "ImageRepositoryType": "ECR",
+                "ImageConfiguration": {
+                  "Port": "8080",
+                  "RuntimeEnvironmentVariables": {
+                    "SPRING_PROFILES_ACTIVE": "aws"
+                  }
+                }
+              }
+            }' \
+            --instance-configuration '{
+              "Cpu": "1 vCPU",
+              "Memory": "2 GB"
+            }' \
+            --health-check-configuration '{
+              "Protocol": "HTTP",
+              "Path": "/actuator/health",
+              "Interval": 10,
+              "Timeout": 5,
+              "HealthyThreshold": 1,
+              "UnhealthyThreshold": 5
+            }'
+        else
+          echo "Updating existing App Runner service..."
+          aws apprunner update-service \
+            --service-arn $SERVICE_ARN \
+            --source-configuration '{
+              "AuthenticationConfiguration": {
+                "AccessRoleArn": "arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/AppRunnerECRAccessRole"
+              },
+              "AutoDeploymentsEnabled": false,
+              "ImageRepository": {
+                "ImageIdentifier": "${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/iucat-library:latest",
+                "ImageRepositoryType": "ECR",
+                "ImageConfiguration": {
+                  "Port": "8080",
+                  "RuntimeEnvironmentVariables": {
+                    "SPRING_PROFILES_ACTIVE": "aws"
+                  }
+                }
+              }
+            }'
+        fi
+        
+    - name: Get App Runner URL
+      run: |
+        SERVICE_ARN=$(aws apprunner list-services --query "ServiceSummaryList[?ServiceName=='iucat-library'].ServiceArn" --output text)
+        SERVICE_URL=$(aws apprunner describe-service --service-arn $SERVICE_ARN --query "Service.ServiceUrl" --output text)
+        echo "App Runner URL: https://$SERVICE_URL"
