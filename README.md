@@ -6,7 +6,9 @@
 
 Production-ready Spring Boot library management system with book rentals, holds/queue system, automated notifications, and multi-cloud deployment.
 
-**Live Demo:** [https://iucat-library.onrender.com/](https://iucat-library.onrender.com/)
+**Live Demos:**
+- **AWS ECS Fargate:** http://iucat-alb-1688673649.us-east-1.elb.amazonaws.com
+- **Render:** https://iucat-library.onrender.com
 
 ---
 
@@ -17,11 +19,13 @@ graph LR
     B --> C[Docker Hub]
     B --> D[AWS ECR]
     C --> E[Render]
-    D --> F[AWS App Runner]
+    D --> F[ECS Fargate]
     E --> G[Spring Boot App]
-    F --> G
-    G --> H[Health Checks]
-    G --> I[Structured Logs]
+    F --> H[ALB]
+    H --> G
+    G --> I[Health Checks]
+    G --> J[Structured Logs]
+    G --> K[Prometheus Metrics]
 ```
 
 ---
@@ -45,9 +49,10 @@ cd iucat
 - ✅ **Book Rentals** - 14-day loans with 2x extensions
 - ✅ **Holds/Queue System** - Automatic queue management
 - ✅ **Advanced Search** - AJAX filters, 100+ books
-- ✅ **Health Checks** - `/actuator/health` endpoints
+- ✅ **Health Checks** - `/actuator/health`, liveness/readiness probes
 - ✅ **Structured Logging** - JSON logs with correlation IDs
-- ✅ **Multi-Cloud** - Render + AWS App Runner
+- ✅ **Prometheus Metrics** - JVM, HTTP, database monitoring
+- ✅ **Multi-Cloud** - AWS ECS Fargate + Render
 - ✅ **CI/CD** - Automated deployment pipeline
 
 ---
@@ -57,30 +62,28 @@ cd iucat
 **Backend:** Java 17, Spring Boot 3.5.6, Spring Data JPA  
 **Frontend:** Thymeleaf, HTML5, CSS3, JavaScript  
 **Database:** H2 (prod), SQLite (dev)  
-**DevOps:** Docker, GitHub Actions, AWS ECR, App Runner, Render  
-**Observability:** Spring Actuator, Logback JSON, MDC Correlation IDs
+**DevOps:** Docker, GitHub Actions, AWS ECR/ECS/ALB, Render  
+**Observability:** Spring Actuator, Logback JSON, MDC Correlation IDs, Prometheus
 
 ---
 
 ## ☁️ Deployments
 
-### Render.com (Active)
+### AWS ECS Fargate (Primary)
+- **URL:** http://iucat-alb-1688673649.us-east-1.elb.amazonaws.com
+- **Architecture:** Internet → ALB → ECS Service → Fargate Tasks
+- **Cluster:** `iucat-cluster` | **Service:** `iucat-service`
+- **Deploy:** Auto on push to `main` via GitHub Actions
+- **Cost:** Free (AWS Free Tier - $100 credits)
+
+**Manual Deploy:**
+```bash
+aws ecs update-service --cluster iucat-cluster --service iucat-service --force-new-deployment
+```
+
+### Render.com (Secondary)
 - **URL:** https://iucat-library.onrender.com
 - **Deploy:** Auto on push to `main`
-
-### AWS App Runner (Setup)
-```bash
-# Create ECR
-aws ecr create-repository --repository-name iucat-library --region us-east-1
-
-# Create IAM role
-aws iam create-role --role-name AppRunnerECRAccessRole \
-    --assume-role-policy-document file://apprunner-trust-policy.json
-aws iam attach-role-policy --role-name AppRunnerECRAccessRole \
-    --policy-arn arn:aws:iam::aws:policy/service-role/AWSAppRunnerServicePolicyForECRAccess
-
-# GitHub Secrets Required: AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION, AWS_ACCOUNT_ID
-```
 
 ---
 
@@ -88,15 +91,20 @@ aws iam attach-role-policy --role-name AppRunnerECRAccessRole \
 
 ### Health Checks
 ```bash
-curl https://iucat-library.onrender.com/actuator/health
-curl https://iucat-library.onrender.com/actuator/health/liveness
-curl https://iucat-library.onrender.com/actuator/health/readiness
+curl http://iucat-alb-1688673649.us-east-1.elb.amazonaws.com/actuator/health
+curl http://iucat-alb-1688673649.us-east-1.elb.amazonaws.com/actuator/health/liveness
+curl http://iucat-alb-1688673649.us-east-1.elb.amazonaws.com/actuator/health/readiness
 ```
 
 ### Correlation IDs
 ```bash
-curl -H "X-Correlation-ID: test-123" https://iucat-library.onrender.com/search
+curl -H "X-Correlation-ID: test-123" http://iucat-alb-1688673649.us-east-1.elb.amazonaws.com/search
 # Check logs for correlationId=test-123
+```
+
+### Prometheus Metrics
+```bash
+curl http://iucat-alb-1688673649.us-east-1.elb.amazonaws.com/actuator/prometheus
 ```
 
 ---
@@ -129,7 +137,7 @@ k6 run load-test.js
 2. **Docker (Render)** - Push to Docker Hub
 3. **Docker (AWS)** - Push to ECR
 4. **Deploy Render** - Webhook trigger
-5. **Deploy AWS** - App Runner service update
+5. **Deploy ECS** - Force new deployment with latest image
 
 **View:** [GitHub Actions](https://github.com/gauri2029/iucat/actions)
 
@@ -167,6 +175,7 @@ holds (id, user_id, book_id, hold_date, expiration_date, status, queue_position)
 - `GET /actuator/health` - Health status
 - `GET /actuator/health/liveness` - Liveness probe
 - `GET /actuator/health/readiness` - Readiness probe
+- `GET /actuator/prometheus` - Prometheus metrics
 
 ---
 
@@ -210,7 +219,7 @@ docker run -p 8080:8080 iucat-library
 
 **Profiles:**
 - `default` - Local dev (SQLite)
-- `aws` - AWS App Runner (H2, JSON logs)
+- `aws` - AWS ECS Fargate (H2, JSON logs)
 - `render` - Render.com (H2, JSON logs)
 
 **Environment Variables:**
@@ -219,10 +228,31 @@ docker run -p 8080:8080 iucat-library
 
 ---
 
+## 🔧 AWS ECS Setup
+
+**GitHub Secrets Required:**
+- `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`
+- `AWS_REGION`, `AWS_ACCOUNT_ID`
+- `ECS_CLUSTER`, `ECS_SERVICE`
+
+**Infrastructure:**
+```bash
+# ECR Repository
+aws ecr create-repository --repository-name iucat-library
+
+# ECS Cluster: iucat-cluster (Fargate)
+# Task Definition: iucat-task (0.5 vCPU, 1GB RAM)
+# Service: iucat-service (1 task, auto-scaling ready)
+# ALB: iucat-alb with health checks
+```
+
+---
+
 ## 🔗 Links
 
 - **Repo:** [github.com/gauri2029/iucat](https://github.com/gauri2029/iucat)
-- **Live:** [iucat-library.onrender.com](https://iucat-library.onrender.com)
+- **Live (AWS):** http://iucat-alb-1688673649.us-east-1.elb.amazonaws.com
+- **Live (Render):** https://iucat-library.onrender.com
 - **Pipeline:** [GitHub Actions](https://github.com/gauri2029/iucat/actions)
 
 ---

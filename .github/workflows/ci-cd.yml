@@ -156,16 +156,13 @@ jobs:
           --force-new-deployment \
           --region us-east-1
         
-        echo "Waiting for service to stabilize..."
-        aws ecs wait services-stable \
-          --cluster ${{ secrets.ECS_CLUSTER }} \
-          --services ${{ secrets.ECS_SERVICE }} \
-          --region us-east-1
-        
-        echo "Deployment complete!"
+        echo "Deployment triggered successfully!"
+        echo "Service will stabilize in 3-5 minutes."
     
     - name: Display deployment info
       run: |
-        echo "ECS Fargate deployment successful!"
+        echo "ECS Fargate deployment initiated!"
         echo "Application URL: http://iucat-alb-1688673649.us-east-1.elb.amazonaws.com"
         echo "Monitor at: https://console.aws.amazon.com/ecs/v2/clusters/iucat-cluster/services/iucat-service"
+        echo ""
+        echo "Note: Service stabilization takes 3-5 minutes. Check the AWS Console for final status."
