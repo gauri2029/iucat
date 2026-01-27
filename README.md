@@ -212,40 +212,6 @@ docker run -p 8080:8080 iucat-library
 ├── load-test.js
 └── pom.xml
 ```
-
----
-
-## 📝 Configuration
-
-**Profiles:**
-- `default` - Local dev (SQLite)
-- `aws` - AWS ECS Fargate (H2, JSON logs)
-- `render` - Render.com (H2, JSON logs)
-
-**Environment Variables:**
-- `SPRING_PROFILES_ACTIVE` - Profile name
-- `SERVER_PORT` - Port (default: 8080)
-
----
-
-## 🔧 AWS ECS Setup
-
-**GitHub Secrets Required:**
-- `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`
-- `AWS_REGION`, `AWS_ACCOUNT_ID`
-- `ECS_CLUSTER`, `ECS_SERVICE`
-
-**Infrastructure:**
-```bash
-# ECR Repository
-aws ecr create-repository --repository-name iucat-library
-
-# ECS Cluster: iucat-cluster (Fargate)
-# Task Definition: iucat-task (0.5 vCPU, 1GB RAM)
-# Service: iucat-service (1 task, auto-scaling ready)
-# ALB: iucat-alb with health checks
-```
-
 ---
 
 ## 🔗 Links
