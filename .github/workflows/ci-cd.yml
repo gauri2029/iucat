@@ -134,7 +134,7 @@ jobs:
         echo "App URL: https://iucat-library.onrender.com"
 
   deploy-aws:
-    name: Deploy to AWS App Runner
+    name: Deploy to AWS ECS Fargate
     needs: docker-build-aws
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
@@ -147,68 +147,25 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: us-east-1
     
-    - name: Deploy to App Runner
+    - name: Force ECS service deployment with latest image
       run: |
-        SERVICE_ARN=$(aws apprunner list-services --region us-east-1 --query "ServiceSummaryList[?ServiceName=='iucat-library'].ServiceArn" --output text)
+        echo "Forcing ECS service update to pull latest image..."
+        aws ecs update-service \
+          --cluster ${{ secrets.ECS_CLUSTER }} \
+          --service ${{ secrets.ECS_SERVICE }} \
+          --force-new-deployment \
+          --region us-east-1
         
-        if [ -z "$SERVICE_ARN" ]; then
-          echo "Creating new App Runner service..."
-          aws apprunner create-service \
-            --region us-east-1 \
-            --service-name iucat-library \
-            --source-configuration '{
-              "AuthenticationConfiguration": {
-                "AccessRoleArn": "arn:aws:iam::182090060123:role/AppRunnerECRAccessRole"
-              },
-              "AutoDeploymentsEnabled": false,
-              "ImageRepository": {
-                "ImageIdentifier": "182090060123.dkr.ecr.us-east-1.amazonaws.com/iucat-library:latest",
-                "ImageRepositoryType": "ECR",
-                "ImageConfiguration": {
-                  "Port": "8080",
-                  "RuntimeEnvironmentVariables": {
-                    "SPRING_PROFILES_ACTIVE": "aws"
-                  }
-                }
-              }
-            }' \
-            --instance-configuration '{
-              "Cpu": "1 vCPU",
-              "Memory": "2 GB"
-            }' \
-            --health-check-configuration '{
-              "Protocol": "HTTP",
-              "Path": "/actuator/health",
-              "Interval": 10,
-              "Timeout": 5,
-              "HealthyThreshold": 1,
-              "UnhealthyThreshold": 5
-            }'
-        else
-          echo "Updating existing App Runner service..."
-          aws apprunner update-service \
-            --region us-east-1 \
-            --service-arn $SERVICE_ARN \
-            --source-configuration '{
-              "AuthenticationConfiguration": {
-                "AccessRoleArn": "arn:aws:iam::182090060123:role/AppRunnerECRAccessRole"
-              },
-              "AutoDeploymentsEnabled": false,
-              "ImageRepository": {
-                "ImageIdentifier": "182090060123.dkr.ecr.us-east-1.amazonaws.com/iucat-library:latest",
-                "ImageRepositoryType": "ECR",
-                "ImageConfiguration": {
-                  "Port": "8080",
-                  "RuntimeEnvironmentVariables": {
-                    "SPRING_PROFILES_ACTIVE": "aws"
-                  }
-                }
-              }
-            }'
-        fi
+        echo "Waiting for service to stabilize..."
+        aws ecs wait services-stable \
+          --cluster ${{ secrets.ECS_CLUSTER }} \
+          --services ${{ secrets.ECS_SERVICE }} \
+          --region us-east-1
         
-    - name: Get App Runner URL
+        echo "Deployment complete!"
+    
+    - name: Display deployment info
       run: |
-        SERVICE_ARN=$(aws apprunner list-services --region us-east-1 --query "ServiceSummaryList[?ServiceName=='iucat-library'].ServiceArn" --output text)
-        SERVICE_URL=$(aws apprunner describe-service --region us-east-1 --service-arn $SERVICE_ARN --query "Service.ServiceUrl" --output text)
-        echo "App Runner URL: https://$SERVICE_URL"
+        echo "ECS Fargate deployment successful!"
+        echo "Application URL: http://iucat-alb-1688673649.us-east-1.elb.amazonaws.com"
+        echo "Monitor at: https://console.aws.amazon.com/ecs/v2/clusters/iucat-cluster/services/iucat-service"
