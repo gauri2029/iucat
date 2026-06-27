@@ -19,6 +19,16 @@
 
 </div>
 
+## 🎥 Application Preview
+
+[![IUCAT application preview](iucat.gif)](https://iucat-library.onrender.com)
+
+<p align="center">
+  <a href="https://iucat-library.onrender.com">
+    <strong>Explore the live application →</strong>
+  </a>
+</p>
+
 ---
 
 ## ✨ What is IUCAT?
