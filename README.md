@@ -1,18 +1,77 @@
-# 📚 IU CAT – Library Management System
+<div align="center">
 
-![CI/CD](https://github.com/gauri2029/iucat/actions/workflows/ci-cd.yml/badge.svg)
-![Java](https://img.shields.io/badge/Java-17-orange)
-![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.6-brightgreen)
+# 📚 IUCAT Library Management System
 
-Production-ready Spring Boot library management system with book rentals, holds/queue system, automated notifications, and multi-cloud deployment.
+### Search, borrow, hold, and manage books through a complete full-stack library workflow
 
-**Live Demos:**
-- **AWS ECS Fargate:** http://iucat-alb-1688673649.us-east-1.elb.amazonaws.com
-- **Render:** https://iucat-library.onrender.com
+[![CI/CD](https://github.com/gauri2029/iucat/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/gauri2029/iucat/actions)
+![Java](https://img.shields.io/badge/Java-17-orange?logo=openjdk&logoColor=white)
+![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.6-6DB33F?logo=springboot&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-Containerized-2496ED?logo=docker&logoColor=white)
+![AWS](https://img.shields.io/badge/AWS-ECS%20Fargate-FF9900?logo=amazonaws&logoColor=white)
+![Render](https://img.shields.io/badge/Render-Live-46E3B7?logo=render&logoColor=black)
+
+[🌐 **Try the Live App**](https://iucat-library.onrender.com)
+&nbsp;•&nbsp;
+[🛠️ **Setup Guide**](docs/SETUP.md)
+&nbsp;•&nbsp;
+[⚙️ **CI/CD Pipeline**](https://github.com/gauri2029/iucat/actions)
+
+</div>
+
+---
+
+## ✨ What is IUCAT?
+
+IUCAT is a full-stack library management application built with **Java, Spring Boot, Thymeleaf, JavaScript, and Docker**.
+
+Users can search the catalog, borrow books, extend rentals, join hold queues, and track their activity through complete end-to-end workflows. The project also includes automated CI/CD, cloud deployment, health checks, structured logging, correlation IDs, Prometheus metrics, and baseline load testing.
+
+> **Demo account:** `abc` / `password123`  
+> Seeded for evaluation purposes only. No real user data is stored.
+
+## 🌐 Live Demo
+
+The Render deployment is fully interactive. Sign in with the demo account and try the search, rental, extension, return, and hold-queue workflows.
+
+### **[Open IUCAT and explore the application →](https://iucat-library.onrender.com)**
+
+<!-- Optional visual preview:
+Add a GIF to docs/images/iucat-demo.gif and uncomment the line below.
+![IUCAT application demo](docs/images/iucat-demo.gif)
+-->
+
+---
+
+## 🚀 Core Features
+
+| Feature | What it supports |
+|---|---|
+| 🔎 **Book Discovery** | Search and filter a catalog of 100+ books with AJAX-powered updates |
+| 📖 **Rentals** | Borrow books for 14 days, extend eligible rentals, and return items |
+| ⏳ **Hold Queues** | Join queues when copies are unavailable and process ready-for-pickup holds |
+| 👤 **User Workflows** | View current rentals, due dates, extensions, and active holds |
+| 🛡️ **Role-Based Access** | Protected workflows for authenticated users |
+| ❤️ **Health Monitoring** | Liveness, readiness, and application health endpoints |
+| 🔭 **Observability** | Structured JSON logs, correlation IDs, and Prometheus metrics |
+| 🚢 **Automated Delivery** | Build, test, containerize, and deploy through GitHub Actions |
+
+---
+
+## 🧑‍💻 Engineering Highlights
+
+- Designed relational workflows for **users, books, rentals, extensions, returns, and hold queues**
+- Built server-rendered interfaces with **Thymeleaf, HTML, CSS, JavaScript, and AJAX**
+- Added request tracing through **MDC correlation IDs** and structured JSON logging
+- Exposed **Spring Actuator** health checks and Prometheus-compatible metrics
+- Automated Maven builds, tests, Docker image publishing, and cloud deployment
+- Validated critical user journeys through unit testing and k6 baseline load testing
+- Deployed the application to **Render** and implemented an **AWS ECS Fargate + ALB** deployment architecture
 
 ---
 
 ## 🏗️ Architecture
+
 ```mermaid
 graph LR
     A[GitHub] --> B[GitHub Actions]
@@ -21,204 +80,159 @@ graph LR
     C --> E[Render]
     D --> F[ECS Fargate]
     E --> G[Spring Boot App]
-    F --> H[ALB]
+    F --> H[Application Load Balancer]
     H --> G
     G --> I[Health Checks]
     G --> J[Structured Logs]
     G --> K[Prometheus Metrics]
 ```
 
+### Cloud status
+
+- ✅ **Render:** Active and available as the public live demo
+- 💤 **AWS ECS Fargate:** Deployment architecture was completed and validated, but the running services are currently paused to avoid ongoing infrastructure costs
+
 ---
 
-## 🚀 Quick Start
+## 🛠️ Tech Stack
+
+### Application
+
+![Java](https://skillicons.dev/icons?i=java)
+![Spring](https://skillicons.dev/icons?i=spring)
+![HTML](https://skillicons.dev/icons?i=html)
+![CSS](https://skillicons.dev/icons?i=css)
+![JavaScript](https://skillicons.dev/icons?i=js)
+
+- **Backend:** Java 17, Spring Boot 3.5.6, Spring MVC, Spring Data JPA
+- **Frontend:** Thymeleaf, HTML5, CSS3, JavaScript, AJAX
+- **Database:** H2 for the deployed profile, SQLite for local development
+
+### Delivery & Observability
+
+![Docker](https://skillicons.dev/icons?i=docker)
+![AWS](https://skillicons.dev/icons?i=aws)
+![GitHub Actions](https://skillicons.dev/icons?i=githubactions)
+![Grafana](https://skillicons.dev/icons?i=grafana)
+
+- **DevOps:** Docker, GitHub Actions, Docker Hub, AWS ECR, ECS Fargate, ALB, Render
+- **Observability:** Spring Actuator, Prometheus metrics, Logback JSON, MDC correlation IDs
+- **Testing:** JUnit, Maven, k6
+
+---
+
+## ⚡ Quick Start
+
 ```bash
-# Clone and run
 git clone https://github.com/gauri2029/iucat.git
 cd iucat
 ./mvnw spring-boot:run
-
-# Access at http://localhost:8080
 ```
 
-**Test Credentials:** `abc` / `password123`
+Open:
+
+```text
+http://localhost:8080
+```
+
+For environment details, Docker commands, testing, observability, and troubleshooting, see the complete **[Setup & Usage Guide](docs/SETUP.md)**.
 
 ---
 
-## ✨ Key Features
+## 📊 Baseline Load Test
 
-- ✅ **Book Rentals** - 14-day loans with 2x extensions
-- ✅ **Holds/Queue System** - Automatic queue management
-- ✅ **Advanced Search** - AJAX filters, 100+ books
-- ✅ **Health Checks** - `/actuator/health`, liveness/readiness probes
-- ✅ **Structured Logging** - JSON logs with correlation IDs
-- ✅ **Prometheus Metrics** - JVM, HTTP, database monitoring
-- ✅ **Multi-Cloud** - AWS ECS Fargate + Render
-- ✅ **CI/CD** - Automated deployment pipeline
+**Scenario:** 10 concurrent users for 2 minutes, generating 660 requests.
 
----
+| Metric | Result |
+|---|---:|
+| Success rate | 100% |
+| Average response time | 75 ms |
+| P95 response time | 109 ms |
+| Maximum response time | 278 ms |
+| Throughput | 5.37 requests/sec |
 
-## 🛠 Tech Stack
+Run the included test:
 
-**Backend:** Java 17, Spring Boot 3.5.6, Spring Data JPA  
-**Frontend:** Thymeleaf, HTML5, CSS3, JavaScript  
-**Database:** H2 (prod), SQLite (dev)  
-**DevOps:** Docker, GitHub Actions, AWS ECR/ECS/ALB, Render  
-**Observability:** Spring Actuator, Logback JSON, MDC Correlation IDs, Prometheus
-
----
-
-## ☁️ Deployments
-
-### AWS ECS Fargate (Primary)
-- **URL:** http://iucat-alb-1688673649.us-east-1.elb.amazonaws.com
-- **Architecture:** Internet → ALB → ECS Service → Fargate Tasks
-- **Cluster:** `iucat-cluster` | **Service:** `iucat-service`
-- **Deploy:** Auto on push to `main` via GitHub Actions
-- **Cost:** Free (AWS Free Tier - $100 credits)
-
-**Manual Deploy:**
 ```bash
-aws ecs update-service --cluster iucat-cluster --service iucat-service --force-new-deployment
-```
-
-### Render.com (Secondary)
-- **URL:** https://iucat-library.onrender.com
-- **Deploy:** Auto on push to `main`
-
----
-
-## 🔍 Observability
-
-### Health Checks
-```bash
-curl http://iucat-alb-1688673649.us-east-1.elb.amazonaws.com/actuator/health
-curl http://iucat-alb-1688673649.us-east-1.elb.amazonaws.com/actuator/health/liveness
-curl http://iucat-alb-1688673649.us-east-1.elb.amazonaws.com/actuator/health/readiness
-```
-
-### Correlation IDs
-```bash
-curl -H "X-Correlation-ID: test-123" http://iucat-alb-1688673649.us-east-1.elb.amazonaws.com/search
-# Check logs for correlationId=test-123
-```
-
-### Prometheus Metrics
-```bash
-curl http://iucat-alb-1688673649.us-east-1.elb.amazonaws.com/actuator/prometheus
-```
-
----
-
-## 📊 Load Test Results
-
-**Test:** 10 concurrent users, 2 minutes, 660 requests
-
-| Metric | Result | Status |
-|--------|--------|--------|
-| Success Rate | 100% | ✅ |
-| Avg Response | 75ms | ✅ |
-| P95 Response | 109ms | ✅ |
-| Max Response | 278ms | ✅ |
-| Requests/sec | 5.37 | ✅ |
-
-**Run Test:**
-```bash
-brew install k6
 k6 run load-test.js
 ```
+
+> These results represent a controlled baseline test and are not intended as a large-scale production benchmark.
 
 ---
 
 ## 🔄 CI/CD Pipeline
 
-**Workflow:** Build → Test → Docker Build → Deploy
-
-1. **Build & Test** - Maven compile + JUnit tests
-2. **Docker (Render)** - Push to Docker Hub
-3. **Docker (AWS)** - Push to ECR
-4. **Deploy Render** - Webhook trigger
-5. **Deploy ECS** - Force new deployment with latest image
-
-**View:** [GitHub Actions](https://github.com/gauri2029/iucat/actions)
-
----
-
-## 🗄 Database Schema
-```sql
-users (id, username, password, role)
-books (id, isbn, title, author, available_copies, total_copies, publication_year, language, format, subject)
-rentals (id, user_id, book_id, rental_date, due_date, return_date, status, extension_count, extension_limit)
-holds (id, user_id, book_id, hold_date, expiration_date, status, queue_position)
+```text
+Build → Test → Docker Build → Publish Image → Deploy
 ```
 
----
+The GitHub Actions workflow:
 
-## 🔗 API Endpoints
+1. Builds the application with Maven
+2. Runs the automated test suite
+3. Builds Docker images
+4. Publishes images to Docker Hub and AWS ECR
+5. Triggers the Render deployment
+6. Supports ECS service deployment using the latest image
 
-### Core
-- `POST /login` - Authenticate
-- `GET /search?query={q}` - Search books
-- `GET /books/{id}` - Book details
-
-### Rentals
-- `GET /my-rentals` - List rentals
-- `POST /rent/{id}` - Rent book
-- `POST /extend/{id}` - Extend due date
-- `POST /return/{id}` - Return book
-
-### Holds
-- `GET /my-holds` - List holds
-- `POST /holds/place/{id}` - Place hold
-- `POST /holds/pickup/{id}` - Pickup ready hold
-
-### Monitoring
-- `GET /actuator/health` - Health status
-- `GET /actuator/health/liveness` - Liveness probe
-- `GET /actuator/health/readiness` - Readiness probe
-- `GET /actuator/prometheus` - Prometheus metrics
+### **[View workflow runs →](https://github.com/gauri2029/iucat/actions)**
 
 ---
 
-## 🧪 Testing
-```bash
-# Unit tests
-./mvnw test
+## 🔍 Observability
 
-# Load test
-k6 run load-test.js
+The application exposes:
 
-# Docker
-docker build -t iucat-library .
-docker run -p 8080:8080 iucat-library
-```
+- `/actuator/health`
+- `/actuator/health/liveness`
+- `/actuator/health/readiness`
+- `/actuator/prometheus`
 
-**Test Flows:**
-1. Login → Search → Rent → Extend (2x) → Return
-2. Rent all copies → Place hold → Return → Hold becomes ready → Pickup
+Requests can include an `X-Correlation-ID` header for traceable structured logs.
+
+More examples are included in the **[Setup & Usage Guide](docs/SETUP.md#observability)**.
+
+---
+
+## 🧪 Key Test Flows
+
+1. Login → Search → Rent → Extend → Return
+2. Rent all available copies → Join hold queue → Return a copy → Process ready hold
 3. Search with filters → Verify AJAX updates
+4. Verify health, readiness, liveness, and metrics endpoints
+5. Build and run the application through Docker
 
 ---
 
-## 📦 Project Structure
-```
-├── .github/workflows/ci-cd.yml    # CI/CD pipeline
+## 🗂️ Repository Structure
+
+```text
+├── .github/workflows/ci-cd.yml
+├── docs/
+│   └── SETUP.md
 ├── src/main/
-│   ├── java/.../config/
-│   │   └── CorrelationIdFilter.java
-│   ├── resources/
-│   │   ├── application-aws.properties
-│   │   └── logback-spring.xml
+│   ├── java/
+│   └── resources/
 ├── Dockerfile
 ├── load-test.js
-└── pom.xml
+├── pom.xml
+└── README.md
 ```
----
-
-## 🔗 Links
-
-- **Repo:** [github.com/gauri2029/iucat](https://github.com/gauri2029/iucat)
-- **Live (AWS):** http://iucat-alb-1688673649.us-east-1.elb.amazonaws.com
-- **Live (Render):** https://iucat-library.onrender.com
-- **Pipeline:** [GitHub Actions](https://github.com/gauri2029/iucat/actions)
 
 ---
+
+## 🔗 Project Links
+
+- 🌐 [Live Application](https://iucat-library.onrender.com)
+- 🛠️ [Setup & Usage Guide](docs/SETUP.md)
+- ⚙️ [GitHub Actions](https://github.com/gauri2029/iucat/actions)
+- 📦 [Repository](https://github.com/gauri2029/iucat)
+
+---
+
+<div align="center">
+
+### Built to explore complete application workflows - from UI and business logic to CI/CD and cloud deployment. ✨
+
+</div>
